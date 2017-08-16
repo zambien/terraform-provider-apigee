@@ -1,7 +1,16 @@
 # terraform-provider-apigee
 A Terraform Apigee provider focused on Products and Proxies.
 
+## Required TFVARS for provider
+
+```
+APIGEE_ORG=user-org-name
+APIGEE_USER_EMAIL=user@email.com
+APIGEE_PASS=youknowwhatgoeshere
+```
+
 ## Example
+
 
 ```
 provider "apigee" {
