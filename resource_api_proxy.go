@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/zambien/go-apigee-edge"
+	"github.com/satori/go.uuid"
 	"fmt"
 	"log"
 )
@@ -19,13 +20,25 @@ func resourceApiProxy() *schema.Resource {
 		Delete: resourceApiProxyDelete,
 
 		Schema: map[string]*schema.Schema{
-			"name": {
+			"name_prefix": {
 				Type:     schema.TypeString,
 				Required: true,
+			},
+			"name": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"bundle": {
 				Type:     schema.TypeString,
 				Required: true,
+			},
+			"bundle_sha": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"revision": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 		},
 	}
@@ -37,7 +50,8 @@ func resourceApiProxyExists(d *schema.ResourceData, meta interface{}) (b bool, e
 	client := meta.(*apigee.EdgeClient)
 
 	if _, _, err := client.Proxies.Get(d.Get("name").(string)); err != nil {
-		if strings.Contains(err.Error(), "404 Not Found") {
+		d.SetId("")
+		if strings.Contains(err.Error(), "404 ") {
 			return false, nil
 		}
 		return false, err
@@ -46,62 +60,21 @@ func resourceApiProxyExists(d *schema.ResourceData, meta interface{}) (b bool, e
 	return true, nil
 }
 
-// TODO: Fix the issue with only zips working for bundles where folders should too
 func resourceApiProxyCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*apigee.EdgeClient)
 
-	/*
-	if proxyRev, resp, err := client.Proxies.Import(d.Get("name").(string),""); err != nil {
-		if strings.Contains(err.Error(), "404 Not Found") {
-			return fmt.Errorf("error creating api_proxy: %s", err.Error())
-		}
-		log.Printf("[INFO] Updating existing Datadog user %q", u.Handle)
-	}*/
+	u1 := uuid.NewV4()
+	name := d.Get("name_prefix").(string) + "-" + u1.String()
 
-	log.Printf("[INFO] Logging in with URL: %#v\n", client.BaseURL.Host)
-	log.Printf("[INFO] Logging in with user: %#v\n", client.BaseURL.User)
-	log.Printf("[INFO] Logging in with: %#v\n", client.UserAgent)
-
-	log.Printf("[INFO] Creating Proxy Name: %#v\n", d.Get("name").(string))
-	log.Printf("[INFO] Creating Proxy From Bundle Location: %#v\n", d.Get("bundle").(string))
-
-	proxyRev, resp, e := client.Proxies.Import(d.Get("name").(string), d.Get("bundle").(string))
+	proxyRev, _, e := client.Proxies.Import(name, d.Get("bundle").(string))
 
 	if e != nil {
-		log.Printf("[ERROR] error creating api_proxy:: %#v\n", resp.StatusCode)
-		log.Printf("[ERROR] error creating api_proxy:: %#v\n", resp.Status)
-		log.Printf("[ERROR] error creating api_proxy:: %#v\n", resp.Body)
 		return fmt.Errorf("error creating api_proxy: %s", e.Error())
 	}
 
-	log.Printf("status: %d\n", resp.StatusCode)
-	log.Printf("status: %s\n", resp.Status)
-	defer resp.Body.Close()
-	log.Printf("proxyRev: %#v\n", proxyRev)
-
-	/*
-	var u datadog.User
-	u.SetDisabled(d.Get("disabled").(bool))
-	u.SetEmail(d.Get("email").(string))
-	u.SetHandle(d.Get("handle").(string))
-	u.SetIsAdmin(d.Get("is_admin").(bool))
-	u.SetName(d.Get("name").(string))
-	u.SetRole(d.Get("role").(string))
-
-	// Datadog does not actually delete users, so CreateUser might return a 409.
-	// We ignore that case and proceed, likely re-enabling the user.
-	if _, err := client.CreateUser(u.Handle, u.Name); err != nil {
-		if !strings.Contains(err.Error(), "API error 409 Conflict") {
-			return fmt.Errorf("error creating user: %s", err.Error())
-		}
-		log.Printf("[INFO] Updating existing Datadog user %q", u.Handle)
-	}
-
-	if err := client.UpdateUser(u); err != nil {
-		return fmt.Errorf("error creating user: %s", err.Error())
-	}*/
-
-	d.SetId(proxyRev.Name)
+	d.SetId(u1.String())
+	d.Set("name", name)
+	d.Set("revision", proxyRev.Revision.String())
 
 	return resourceApiProxyRead(d, meta)
 }
@@ -115,28 +88,53 @@ func resourceApiProxyRead(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
-	//TODO add more than name
 	d.Set("name", u.Name)
 
 	return nil
 }
 
-//TODO: actually make it update
+// TODO: Refactor for DRY
 func resourceApiProxyUpdate(d *schema.ResourceData, meta interface{}) error {
+
 	client := meta.(*apigee.EdgeClient)
 
-	u, _, err := client.Proxies.Get(d.Get("name").(string))
-	if err != nil {
-		return err
-	}
+	log.Printf("resourceApiProxyUpdate name_prefix changed: %#v\n", d.HasChange("name_prefix"))
+	log.Printf("resourceApiProxyUpdate bundle_sha changed: %#v\n", d.HasChange("bundle_sha"))
 
-	//TODO add more than name
-	d.Set("name", u.Name)
+	 if d.HasChange("name_prefix") {
+
+		  _, _, err := client.Proxies.Delete(d.Get("name").(string))
+		 if err != nil {
+			 return err
+		 }
+
+		 u1 := uuid.NewV4()
+		 name := d.Get("name_prefix").(string) + "-" + u1.String()
+
+		 proxyRev, _, e := client.Proxies.Import(name, d.Get("bundle").(string))
+		 if e != nil {
+			 return fmt.Errorf("error creating api_proxy: %s", e.Error())
+		 }
+
+		 d.SetId(u1.String())
+		 d.Set("name", name)
+		 d.Set("revision", proxyRev.Revision.String())
+
+	 } else if d.HasChange("bundle_sha") {
+
+		 name := d.Get("name").(string)
+
+		 proxyRev, _, e := client.Proxies.Import(name, d.Get("bundle").(string))
+		 if e != nil {
+			 return fmt.Errorf("error creating api_proxy: %s", e.Error())
+		 }
+
+		 d.Set("revision", proxyRev.Revision.String())
+	 }
 
 	return nil
 }
 
-//TODO: actually make it delete
 func resourceApiProxyDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*apigee.EdgeClient)
 
