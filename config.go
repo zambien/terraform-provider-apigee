@@ -1,9 +1,9 @@
 
-package terraform_provider_apigee
+package main
 
 import (
 	"log"
-	"github.com/DinoChiesa/go-apigee-edge"
+	"github.com/zambien/go-apigee-edge"
 )
 
 // Config holds API and APP keys to authenticate to Datadog.

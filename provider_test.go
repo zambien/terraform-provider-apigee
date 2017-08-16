@@ -1,6 +1,6 @@
 // File : provider_test.go
 
-package terraform_provider_apigee
+package main
 
 import (
 	"os"
