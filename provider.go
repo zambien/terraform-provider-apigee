@@ -38,6 +38,7 @@ func Provider() terraform.ResourceProvider {
 
 		ResourcesMap: map[string]*schema.Resource{
 			"apigee_api_proxy":  resourceApiProxy(),
+			"apigee_api_proxy_deployment": resourceApiProxyDeployment(),
 		},
 
 		ConfigureFunc: configureProvider,

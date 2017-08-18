@@ -1,37 +1,50 @@
 # terraform-provider-apigee [WIP]
-A Terraform Apigee provider focused on Products and Proxies.
+A Terraform Apigee provider focused on Proxies and Deployments.
 
 This is a work in progress.  Once it is to the point that is solves the use cases of proxy create and deploy I will submit PR to the terraform-providers repo.
 
 ## TFVARS for provider
 
 ```
-APIGEE_BASE_URI="https://someinternalapigee.yourdomain.wtf" # optional... defaults to Apigee's SaaS
-APIGEE_ORG="user-org-name"
-APIGEE_USER="user@email.com"
-APIGEE_PASSWORD="fortheloveofpetepleaseuseastrongpassword"
+APIGEE_BASE_URI="https://someinternalapigee.yourdomain.suffix" # optional... defaults to Apigee's SaaS
+APIGEE_ORG="my-really-cool-apigee-org-name"
+APIGEE_USER="some_dude@domain.suffix"
+APIGEE_PASSWORD="for_the_love_of_pete_please_use_a_strong_password"
 ```
 
 ## Simple Example
 
 ```
-provider "apigee" {
-  org="my_really_cool_org_name"
-  user="some_dude@domain.wtf"
-  password="didupickastrongone?" # Generally speaking, don't put passwords in your tf files... pull from a Vault or something.
-}
 
-resource "apigee_api_proxy" "helloworld_proxy" {
-   name_prefix =  "helloworld-terraformed" # used to prepend your proxy name.  Name will be name_prefix + a uuid.
-   bundle = "${data.archive_file.bundle.output_path}" # Apigee APIs require a zip bundle to import a proxy.
-   bundle_sha = "${data.archive_file.bundle.output_sha}" # The SHA is used to detect changes for plan/apply.
+variable "org" { default = "my-really-cool-apigee-org-name" }
+variable "env" { default = "test" }
+
+provider "apigee" {
+  org           = "${var.org}"
+  user          = "some_dude@domain.suffix"
+  password      = "did_u_pick_a_strong_one?"                # Generally speaking, don't put passwords in your tf files... pull from a Vault or something.
 }
 
 # This is a normal terraform offering and serves as an example of how you might create a proxy bundle.
 data "archive_file" "bundle" {
-   type        = "zip"
-   source_dir = "${path.module}/proxy_files"
-   output_path = "${path.module}/proxy_files_bundle/apiproxy.zip"
+   type         = "zip"
+   source_dir   = "${path.module}/proxy_files"
+   output_path  = "${path.module}/proxy_files_bundle/apiproxy.zip"
+}
+
+# The api proxy in Apigee
+resource "apigee_api_proxy" "helloworld_proxy" {
+   name_prefix  = "helloworld-terraformed"                  # used to prepend your proxy name.  Name will be name_prefix + a uuid.
+   bundle       = "${data.archive_file.bundle.output_path}" # Apigee APIs require a zip bundle to import a proxy.
+   bundle_sha   = "${data.archive_file.bundle.output_sha}"  # The SHA is used to detect changes for plan/apply.
+}
+
+# A proxy deployment in Apigee
+resource "apigee_api_proxy_deployment" "helloworld_proxy_deployment" {
+   proxy_name   = "${apigee_api_proxy.helloworld_proxy.name}"
+   org          = "${var.org}"
+   env          = "${var.env}"
+   revision     = "${apigee_api_proxy.helloworld_proxy.revision}"
 }
 
 # Outputs
@@ -39,7 +52,16 @@ output "apigee_api_proxy_name" {
    value = ["${apigee_api_proxy.helloworld_proxy.name}"]
 }
 
-output "apigee_api_proxy_revision" {
-   value = ["${apigee_api_proxy.helloworld_proxy.revision}"]
+output "apigee_api_proxy_deployed_id" {
+   value = ["${apigee_api_proxy_deployment.helloworld_proxy_deployment.id}"]
 }
+
+output "apigee_api_proxy_deployed_rev" {
+   value = ["${apigee_api_proxy_deployment.helloworld_proxy_deployment.revision}"]
+}
+
 ```
+
+## Issues
+
+Right now if you rev your proxy bundle and apply your deployment will not update automatically if you reference that proxy rev as in the example above.  I'm looking into why that happens.
