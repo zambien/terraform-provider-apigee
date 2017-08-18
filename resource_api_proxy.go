@@ -1,13 +1,12 @@
-
 package main
 
 import (
 	"strings"
 
-	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/zambien/go-apigee-edge"
-	"github.com/satori/go.uuid"
 	"fmt"
+	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/satori/go.uuid"
+	"github.com/zambien/go-apigee-edge"
 	"log"
 	"strconv"
 )
@@ -15,7 +14,7 @@ import (
 func resourceApiProxy() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceApiProxyCreate,
-		Read: 	resourceApiProxyRead,
+		Read:   resourceApiProxyRead,
 		Update: resourceApiProxyUpdate,
 		Delete: resourceApiProxyDelete,
 
@@ -62,7 +61,6 @@ func resourceApiProxyCreate(d *schema.ResourceData, meta interface{}) error {
 	return resourceApiProxyRead(d, meta)
 }
 
-
 func resourceApiProxyRead(d *schema.ResourceData, meta interface{}) error {
 
 	log.Print("[DEBUG] resourceApiProxyRead START")
@@ -78,7 +76,7 @@ func resourceApiProxyRead(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
-	latest_rev:= strconv.Itoa(len(u.Revisions))
+	latest_rev := strconv.Itoa(len(u.Revisions))
 
 	d.Set("revision", latest_rev)
 	d.Set("name", u.Name)
@@ -92,7 +90,6 @@ func resourceApiProxyUpdate(d *schema.ResourceData, meta interface{}) error {
 
 	client := meta.(*apigee.EdgeClient)
 
-
 	if d.HasChange("name") {
 		log.Printf("[INFO] resourceApiProxyUpdate name changed to: %#v\n", d.Get("name"))
 	}
@@ -105,14 +102,14 @@ func resourceApiProxyUpdate(d *schema.ResourceData, meta interface{}) error {
 
 		_, _, err := client.Proxies.Delete(d.Get("name").(string))
 		if err != nil {
-		 return err
+			return err
 		}
 
 		u1 := uuid.NewV4()
 
 		proxyRev, _, e := client.Proxies.Import(d.Get("name").(string), d.Get("bundle").(string))
 		if e != nil {
-		 return fmt.Errorf("error creating api_proxy: %s", e.Error())
+			return fmt.Errorf("error creating api_proxy: %s", e.Error())
 		}
 
 		d.SetId(u1.String())
@@ -123,7 +120,7 @@ func resourceApiProxyUpdate(d *schema.ResourceData, meta interface{}) error {
 
 		proxyRev, _, e := client.Proxies.Import(d.Get("name").(string), d.Get("bundle").(string))
 		if e != nil {
-		 return fmt.Errorf("error creating api_proxy: %s", e.Error())
+			return fmt.Errorf("error creating api_proxy: %s", e.Error())
 		}
 
 		d.Set("revision", proxyRev.Revision.String())

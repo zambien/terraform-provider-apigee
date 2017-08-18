@@ -1,12 +1,11 @@
-
 package main
 
 import (
+	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/satori/go.uuid"
 	"github.com/zambien/go-apigee-edge"
 	"log"
-	"fmt"
-	"github.com/satori/go.uuid"
 	"strconv"
 	"strings"
 )
@@ -14,7 +13,7 @@ import (
 func resourceApiProxyDeployment() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceApiProxyDeploymentCreate,
-		Read: 	resourceApiProxyDeploymentRead,
+		Read:   resourceApiProxyDeploymentRead,
 		Update: resourceApiProxyDeploymentUpdate,
 		Delete: resourceApiProxyDeploymentDelete,
 
@@ -38,15 +37,19 @@ func resourceApiProxyDeployment() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"sha": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
 			"delay": {
 				Type:     schema.TypeInt,
 				Optional: true,
-				Default: 0,
+				Default:  0,
 			},
 			"override": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default: false,
+				Default:  false,
 			},
 		},
 	}
@@ -93,9 +96,9 @@ func resourceApiProxyDeploymentCreate(d *schema.ResourceData, meta interface{}) 
 
 	client := meta.(*apigee.EdgeClient)
 
-	proxy_name :=d.Get("proxy_name").(string)
+	proxy_name := d.Get("proxy_name").(string)
 	env := d.Get("env").(string)
-	rev_int, _:= strconv.Atoi(d.Get("revision").(string))
+	rev_int, _ := strconv.Atoi(d.Get("revision").(string))
 	rev := apigee.Revision(rev_int)
 	delay := int(d.Get("delay").(int))
 	override := bool(d.Get("override").(bool))
@@ -118,9 +121,9 @@ func resourceApiProxyDeploymentUpdate(d *schema.ResourceData, meta interface{}) 
 
 	client := meta.(*apigee.EdgeClient)
 
-	proxy_name :=d.Get("proxy_name").(string)
+	proxy_name := d.Get("proxy_name").(string)
 	env := d.Get("env").(string)
-	rev_int, _:= strconv.Atoi(d.Get("revision").(string))
+	rev_int, _ := strconv.Atoi(d.Get("revision").(string))
 	rev := apigee.Revision(rev_int)
 	delay := int(d.Get("delay").(int))
 	override := bool(d.Get("override").(bool))
@@ -143,7 +146,7 @@ func resourceApiProxyDeploymentUpdate(d *schema.ResourceData, meta interface{}) 
 		d.SetId(uuid.NewV4().String())
 		d.Set("revision", proxyDep.Revision.String())
 
-	} else if d.HasChange("revision") {
+	} else if d.HasChange("revision") || d.HasChange("sha") {
 
 		log.Print("[INFO] resourceApiProxyDeploymentUpdate Change detected which allows in place deploy.")
 
@@ -174,9 +177,9 @@ func resourceApiProxyDeploymentDelete(d *schema.ResourceData, meta interface{}) 
 
 	client := meta.(*apigee.EdgeClient)
 
-	proxy_name :=d.Get("proxy_name").(string)
+	proxy_name := d.Get("proxy_name").(string)
 	env := d.Get("env").(string)
-	rev_int, _:= strconv.Atoi(d.Get("revision").(string))
+	rev_int, _ := strconv.Atoi(d.Get("revision").(string))
 	rev := apigee.Revision(rev_int)
 
 	_, _, err := client.Proxies.Undeploy(proxy_name, env, rev)
