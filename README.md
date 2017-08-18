@@ -1,7 +1,7 @@
-# terraform-provider-apigee [WIP]
+# terraform-provider-apigee
 A Terraform Apigee provider focused on Proxies and Deployments.
 
-This is a work in progress.  Once it is to the point that is solves the use cases of proxy create and deploy I will submit PR to the terraform-providers repo.
+Allows Terraform deployments and management of Apigee API proxies.
 
 ## TFVARS for provider
 
@@ -32,9 +32,9 @@ data "archive_file" "bundle" {
    output_path  = "${path.module}/proxy_files_bundle/apiproxy.zip"
 }
 
-# The api proxy in Apigee
+# The API proxy in Apigee
 resource "apigee_api_proxy" "helloworld_proxy" {
-   name_prefix  = "helloworld-terraformed"                  # used to prepend your proxy name.  Name will be name_prefix + a uuid.
+   name  = "helloworld-terraformed"                         # The proxy name.
    bundle       = "${data.archive_file.bundle.output_path}" # Apigee APIs require a zip bundle to import a proxy.
    bundle_sha   = "${data.archive_file.bundle.output_sha}"  # The SHA is used to detect changes for plan/apply.
 }
@@ -64,4 +64,6 @@ output "apigee_api_proxy_deployed_rev" {
 
 ## Issues
 
-Right now if you rev your proxy bundle and apply your deployment will not update automatically if you reference that proxy rev as in the example above.  I'm looking into why that happens.
+Right now if you rev your proxy bundle and apply your deployment will not update automatically if you reference that proxy rev as in the example above so you will need to apply twice for the deployment to occur.
+
+I'm looking into why that happens.

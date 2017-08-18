@@ -22,14 +22,17 @@ func resourceApiProxyDeployment() *schema.Resource {
 			"proxy_name": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 			"org": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 			"env": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 			"revision": {
 				Type:     schema.TypeString,
@@ -50,41 +53,45 @@ func resourceApiProxyDeployment() *schema.Resource {
 }
 
 func resourceApiProxyDeploymentRead(d *schema.ResourceData, meta interface{}) (e error) {
-	// Exists - This is called to verify a resource still exists. It is called prior to Read,
-	// and lowers the burden of Read to be able to assume the resource exists.
+
+	log.Print("[DEBUG] resourceApiProxyDeploymentRead START")
+
 	client := meta.(*apigee.EdgeClient)
-	log.Print("resourceApiProxyDeploymentRead START")
+
+	found := false
 
 	if deployments, _, err := client.Proxies.GetDeployments(d.Get("proxy_name").(string)); err != nil {
 
-		log.Printf("resourceApiProxyDeploymentRead error getting deployments: %s", e.Error())
+		log.Printf("[ERROR] resourceApiProxyDeploymentRead error getting deployments: %s", e.Error())
 
 	} else {
 
-		log.Print("resourceApiProxyDeploymentRead deployments call fired")
+		log.Print("[DEBUG] resourceApiProxyDeploymentRead deployments call fired")
 
 		// TODO: Maybe look at this for the first refactoring exercise... https://github.com/fatih/structs
 		for _, environment := range deployments.Environments {
-			log.Printf("resourceApiProxyDeploymentRead checking deploys in environment: %#v for env: %#v\n", environment.Name, d.Get("env").(string))
+			log.Printf("[DEBUG] resourceApiProxyDeploymentRead checking deploys in environment: %#v for env: %#v\n", environment.Name, d.Get("env").(string))
 			if environment.Name == d.Get("env").(string) {
 				for _, revision := range environment.Revision {
-					log.Printf("resourceApiProxyDeploymentRead checking revision in revision: %#v for env: %#v\n", revision.Number, d.Get("revision").(string))
-					d.Set("revision", revision.Number.String())
-					return nil
+					log.Printf("[DEBUG] resourceApiProxyDeploymentRead checking revision in revision: %#v for env: %#v\n", revision.Number.String(), d.Get("revision").(string))
+					found = true
 				}
 			}
 		}
 	}
 
-	log.Print("resourceApiProxyDeploymentRead - no deployment found")
-	d.SetId("")
+	if !found {
+		log.Print("[INFO] resourceApiProxyDeploymentRead - no deployment found")
+		d.SetId("")
+	}
 	return nil
 }
 
 func resourceApiProxyDeploymentCreate(d *schema.ResourceData, meta interface{}) error {
 
+	log.Print("[DEBUG] resourceApiProxyDeploymentCreate START")
+
 	client := meta.(*apigee.EdgeClient)
-	log.Print("resourceApiProxyDeploymentCreate START")
 
 	proxy_name :=d.Get("proxy_name").(string)
 	env := d.Get("env").(string)
@@ -107,8 +114,9 @@ func resourceApiProxyDeploymentCreate(d *schema.ResourceData, meta interface{}) 
 
 func resourceApiProxyDeploymentUpdate(d *schema.ResourceData, meta interface{}) error {
 
+	log.Print("[DEBUG] resourceApiProxyDeploymentUpdate START")
+
 	client := meta.(*apigee.EdgeClient)
-	log.Print("resourceApiProxyDeploymentUpdate START")
 
 	proxy_name :=d.Get("proxy_name").(string)
 	env := d.Get("env").(string)
@@ -119,7 +127,7 @@ func resourceApiProxyDeploymentUpdate(d *schema.ResourceData, meta interface{}) 
 
 	if d.HasChange("proxy_name") || d.HasChange("env") {
 
-		log.Print("resourceApiProxyDeploymentUpdate Change detected which requires undeploy and new deploy.")
+		log.Print("[INFO] resourceApiProxyDeploymentUpdate Change detected which requires undeploy and new deploy.")
 
 		_, _, err := client.Proxies.Undeploy(proxy_name, env, rev)
 		if err != nil {
@@ -137,9 +145,17 @@ func resourceApiProxyDeploymentUpdate(d *schema.ResourceData, meta interface{}) 
 
 	} else if d.HasChange("revision") {
 
-		log.Print("resourceApiProxyDeploymentUpdate Change detected which allows in place deploy.")
+		log.Print("[INFO] resourceApiProxyDeploymentUpdate Change detected which allows in place deploy.")
 
-		_, _, err := client.Proxies.ReDeploy(proxy_name, env, rev, 12, true)
+		//We must set delay and override here if not set.
+		if delay == 0 {
+			delay = 15 //seconds
+		}
+		if override == false {
+			override = true
+		}
+
+		_, _, err := client.Proxies.ReDeploy(proxy_name, env, rev, delay, override)
 
 		if err != nil {
 			if strings.Contains(err.Error(), " is already deployed into environment ") {
@@ -154,8 +170,9 @@ func resourceApiProxyDeploymentUpdate(d *schema.ResourceData, meta interface{}) 
 
 func resourceApiProxyDeploymentDelete(d *schema.ResourceData, meta interface{}) error {
 
+	log.Print("[DEBUG] resourceApiProxyDeploymentDelete START")
+
 	client := meta.(*apigee.EdgeClient)
-	log.Print("resourceApiProxyDeploymentDelete START")
 
 	proxy_name :=d.Get("proxy_name").(string)
 	env := d.Get("env").(string)
