@@ -64,14 +64,14 @@ output "apigee_api_proxy_deployed_rev" {
 
 ## Issues
 
-Right now if you rev your proxy bundle and apply your deployment will not update automatically if you reference that proxy rev as in the example above so you will need to apply twice for the deployment to occur.
+Right now if you rev your proxy bundle then apply your deployment will not update automatically if you reference that proxy rev (as in the example above).
 
 To work around the issue you can apply twice:
 ```
 terraform apply && terraform apply
 ```
 
-or track the next revision number in a variable or in the script...
+Or manually change the revision number in a variable or in the script...
 ```
 resource "apigee_api_proxy_deployment" "helloworld_proxy_deployment" {
    proxy_name   = "${apigee_api_proxy.helloworld_proxy.name}"
@@ -81,4 +81,5 @@ resource "apigee_api_proxy_deployment" "helloworld_proxy_deployment" {
 }
 ```
 
-I'm looking into why that happens.
+This is happening due to a known issue in Terraform that should be fixed soon:
+https://github.com/hashicorp/terraform/issues/15857
