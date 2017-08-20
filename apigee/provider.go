@@ -1,5 +1,5 @@
 // File : provider.go
-package main
+package apigee
 
 import (
 	"github.com/hashicorp/terraform/helper/schema"

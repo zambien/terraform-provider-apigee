@@ -1,4 +1,4 @@
-package main
+package apigee
 
 import (
 	"strings"

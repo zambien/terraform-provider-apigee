@@ -74,7 +74,7 @@ resource "apigee_target_servers" "helloworld_target_server" {
 ```
 
 ## Contributions
-Please read [our contribution guidelines.](https://github.com/zambien/terraform-provider-apigee/blob/master/CONTRIBUTING.md)
+Please read [our contribution guidelines.](https://github.com/zambien/terraform-provider-apigee/blob/master/.github/CONTRIBUTING.md)
 
 ## Important Known Issues
 

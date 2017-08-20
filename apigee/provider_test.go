@@ -1,6 +1,6 @@
 // File : provider_test.go
 
-package main
+package apigee
 
 import (
 	"os"

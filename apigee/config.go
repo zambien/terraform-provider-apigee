@@ -1,4 +1,4 @@
-package main
+package apigee
 
 import (
 	"github.com/zambien/go-apigee-edge"
