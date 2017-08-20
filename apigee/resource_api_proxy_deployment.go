@@ -124,44 +124,21 @@ func resourceApiProxyDeploymentUpdate(d *schema.ResourceData, meta interface{}) 
 	delay := int(d.Get("delay").(int))
 	override := bool(d.Get("override").(bool))
 
-	if d.HasChange("proxy_name") || d.HasChange("env") {
+	//We must set delay and override here if not set.
+	if delay == 0 {
+		delay = 15 //seconds
+	}
+	if override == false {
+		override = true
+	}
 
-		log.Print("[INFO] resourceApiProxyDeploymentUpdate Change detected which requires undeploy and new deploy.")
+	_, _, err := client.Proxies.ReDeploy(proxy_name, env, rev, delay, override)
 
-		_, _, err := client.Proxies.Undeploy(proxy_name, env, rev)
-		if err != nil {
-			return fmt.Errorf("error undeploying: %s", err.Error())
+	if err != nil {
+		if strings.Contains(err.Error(), " is already deployed into environment ") {
+			return resourceApiProxyDeploymentRead(d, meta)
 		}
-
-		proxyDep, _, err := client.Proxies.Deploy(proxy_name, env, rev, delay, override)
-
-		if err != nil {
-			return fmt.Errorf("error deploying: %s", err.Error())
-		}
-
-		d.SetId(uuid.NewV4().String())
-		d.Set("revision", proxyDep.Revision.String())
-
-	} else if d.HasChange("revision") {
-
-		log.Print("[INFO] resourceApiProxyDeploymentUpdate Change detected which allows in place deploy.")
-
-		//We must set delay and override here if not set.
-		if delay == 0 {
-			delay = 15 //seconds
-		}
-		if override == false {
-			override = true
-		}
-
-		_, _, err := client.Proxies.ReDeploy(proxy_name, env, rev, delay, override)
-
-		if err != nil {
-			if strings.Contains(err.Error(), " is already deployed into environment ") {
-				return resourceApiProxyDeploymentRead(d, meta)
-			}
-			return fmt.Errorf("error deploying: %s", err.Error())
-		}
+		return fmt.Errorf("error deploying: %s", err.Error())
 	}
 
 	return resourceApiProxyDeploymentRead(d, meta)

@@ -104,37 +104,14 @@ func resourceApiProxyUpdate(d *schema.ResourceData, meta interface{}) error {
 	if d.HasChange("bundle_sha") {
 		log.Printf("[INFO] resourceApiProxyUpdate bundle_sha changed to: %#v\n", d.Get("bundle_sha"))
 	}
-
-	if d.HasChange("name") {
-
-		_, _, err := client.Proxies.Delete(d.Get("name").(string))
-		if err != nil {
-			return err
-		}
-
-		u1 := uuid.NewV4()
-
-		proxyRev, _, e := client.Proxies.Import(d.Get("name").(string), d.Get("bundle").(string))
-		if e != nil {
-			return fmt.Errorf("error creating api_proxy: %s", e.Error())
-		}
-
-		d.SetId(u1.String())
-		d.Set("name", d.Get("name").(string))
-		d.Set("revision", proxyRev.Revision.String())
-		d.Set("output_sha", d.Get("bundle_sha").(string))
-
-	} else if d.HasChange("bundle_sha") {
-
-		proxyRev, _, e := client.Proxies.Import(d.Get("name").(string), d.Get("bundle").(string))
-		if e != nil {
-			return fmt.Errorf("error creating api_proxy: %s", e.Error())
-		}
-
-		d.Set("revision", proxyRev.Revision.String())
-		d.Set("output_sha", d.Get("bundle_sha").(string))
-
+	
+	proxyRev, _, e := client.Proxies.Import(d.Get("name").(string), d.Get("bundle").(string))
+	if e != nil {
+		return fmt.Errorf("error creating api_proxy: %s", e.Error())
 	}
+
+	d.Set("revision", proxyRev.Revision.String())
+	d.Set("output_sha", d.Get("bundle_sha").(string))
 
 	return resourceApiProxyRead(d, meta)
 }
