@@ -37,10 +37,6 @@ func resourceApiProxyDeployment() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"sha": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
 			"delay": {
 				Type:     schema.TypeInt,
 				Optional: true,
@@ -146,7 +142,7 @@ func resourceApiProxyDeploymentUpdate(d *schema.ResourceData, meta interface{}) 
 		d.SetId(uuid.NewV4().String())
 		d.Set("revision", proxyDep.Revision.String())
 
-	} else if d.HasChange("revision") || d.HasChange("sha") {
+	} else if d.HasChange("revision") {
 
 		log.Print("[INFO] resourceApiProxyDeploymentUpdate Change detected which allows in place deploy.")
 

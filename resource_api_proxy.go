@@ -32,6 +32,11 @@ func resourceApiProxy() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			//bundle_sha is not used but is a workaround for: https://github.com/hashicorp/terraform/issues/15857
+			"output_sha": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"revision": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -57,6 +62,7 @@ func resourceApiProxyCreate(d *schema.ResourceData, meta interface{}) error {
 	d.SetId(u1.String())
 	d.Set("name", d.Get("name").(string))
 	d.Set("revision", proxyRev.Revision.String())
+	d.Set("output_sha", d.Get("bundle_sha").(string))
 
 	return resourceApiProxyRead(d, meta)
 }
@@ -78,6 +84,7 @@ func resourceApiProxyRead(d *schema.ResourceData, meta interface{}) error {
 
 	latest_rev := strconv.Itoa(len(u.Revisions))
 
+	d.Set("output_sha", d.Get("bundle_sha").(string))
 	d.Set("revision", latest_rev)
 	d.Set("name", u.Name)
 
@@ -115,6 +122,7 @@ func resourceApiProxyUpdate(d *schema.ResourceData, meta interface{}) error {
 		d.SetId(u1.String())
 		d.Set("name", d.Get("name").(string))
 		d.Set("revision", proxyRev.Revision.String())
+		d.Set("output_sha", d.Get("bundle_sha").(string))
 
 	} else if d.HasChange("bundle_sha") {
 
@@ -124,10 +132,11 @@ func resourceApiProxyUpdate(d *schema.ResourceData, meta interface{}) error {
 		}
 
 		d.Set("revision", proxyRev.Revision.String())
+		d.Set("output_sha", d.Get("bundle_sha").(string))
 
 	}
 
-	return nil
+	return resourceApiProxyRead(d, meta)
 }
 
 func resourceApiProxyDelete(d *schema.ResourceData, meta interface{}) error {

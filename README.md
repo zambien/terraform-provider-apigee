@@ -1,7 +1,10 @@
 # terraform-provider-apigee
-A Terraform Apigee provider focused on Proxies and Deployments.
 
-Allows Terraform deployments and management of Apigee API proxies.
+A Terraform Apigee provider.
+
+Allows Terraform deployments and management of Apigee API proxies and target servers.
+
+I plan to create the Product resource next and will see where interest goes from there.
 
 ## TFVARS for provider
 
@@ -32,14 +35,14 @@ data "archive_file" "bundle" {
    output_path  = "${path.module}/proxy_files_bundle/apiproxy.zip"
 }
 
-# The API proxy in Apigee
+# The API proxy
 resource "apigee_api_proxy" "helloworld_proxy" {
    name  = "helloworld-terraformed"                         # The proxy name.
    bundle       = "${data.archive_file.bundle.output_path}" # Apigee APIs require a zip bundle to import a proxy.
    bundle_sha   = "${data.archive_file.bundle.output_sha}"  # The SHA is used to detect changes for plan/apply.
 }
 
-# A proxy deployment in Apigee
+# A proxy deployment
 resource "apigee_api_proxy_deployment" "helloworld_proxy_deployment" {
    proxy_name   = "${apigee_api_proxy.helloworld_proxy.name}"
    org          = "${var.org}"
@@ -47,17 +50,25 @@ resource "apigee_api_proxy_deployment" "helloworld_proxy_deployment" {
    revision     = "${apigee_api_proxy.helloworld_proxy.revision}"
 }
 
-# Outputs
-output "apigee_api_proxy_name" {
-   value = ["${apigee_api_proxy.helloworld_proxy.name}"]
-}
+# A target server
+resource "apigee_target_servers" "helloworld_target_server" {
+   name = "helloworld_target_server"
+   host = "somehost.thatexists.com"
+   env = "${var.env}"
+   enabled = true
+   port = 8080
 
-output "apigee_api_proxy_deployed_id" {
-   value = ["${apigee_api_proxy_deployment.helloworld_proxy_deployment.id}"]
-}
+   ssl_info {
+      ssl_enabled = false
+      client_auth_enabled = false
+      key_store = ""
+      trust_store = ""
+      key_alias = ""
+      ignore_validation_errors = false
+      ciphers = [""]
+      protocols = [""]
 
-output "apigee_api_proxy_deployed_rev" {
-   value = ["${apigee_api_proxy_deployment.helloworld_proxy_deployment.revision}"]
+   }
 }
 
 ```
