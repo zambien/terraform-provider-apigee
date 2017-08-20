@@ -73,7 +73,10 @@ resource "apigee_target_servers" "helloworld_target_server" {
 
 ```
 
-## Issues
+## Contributions
+Please read [our contribution guidelines.](https://github.com/zambien/terraform-provider-apigee/blob/master/CONTRIBUTING.md)
+
+## Important Known Issues
 
 Right now if you rev your proxy bundle then apply your deployment will not update automatically if you reference that proxy rev (as in the example above).
 
