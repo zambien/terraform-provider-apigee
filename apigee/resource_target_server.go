@@ -10,12 +10,12 @@ import (
 	"strings"
 )
 
-func resourceTargetServers() *schema.Resource {
+func resourceTargetServer() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceTargetServersCreate,
-		Read:   resourceTargetServersRead,
-		Update: resourceTargetServersUpdate,
-		Delete: resourceTargetServersDelete,
+		Create: resourceTargetServerCreate,
+		Read:   resourceTargetServerRead,
+		Update: resourceTargetServerUpdate,
+		Delete: resourceTargetServerDelete,
 
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -88,9 +88,9 @@ func resourceTargetServers() *schema.Resource {
 	}
 }
 
-func resourceTargetServersCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceTargetServerCreate(d *schema.ResourceData, meta interface{}) error {
 
-	log.Print("[DEBUG] resourceTargetServersCreate START")
+	log.Print("[DEBUG] resourceTargetServerCreate START")
 
 	client := meta.(*apigee.EdgeClient)
 
@@ -99,7 +99,7 @@ func resourceTargetServersCreate(d *schema.ResourceData, meta interface{}) error
 
 	targetServerData, err := setTargetServerData(d)
 	if err != nil {
-		return fmt.Errorf("resourceTargetServersCreate error in setTargetServerData: %s", err.Error())
+		return fmt.Errorf("resourceTargetServerCreate error in setTargetServerData: %s", err.Error())
 	}
 
 	_, _, e := client.TargetServers.Create(targetServerData, d.Get("env").(string))
@@ -107,12 +107,12 @@ func resourceTargetServersCreate(d *schema.ResourceData, meta interface{}) error
 		return e
 	}
 
-	return resourceTargetServersRead(d, meta)
+	return resourceTargetServerRead(d, meta)
 }
 
-func resourceTargetServersRead(d *schema.ResourceData, meta interface{}) error {
+func resourceTargetServerRead(d *schema.ResourceData, meta interface{}) error {
 
-	log.Print("[DEBUG] resourceTargetServersRead START")
+	log.Print("[DEBUG] resourceTargetServerRead START")
 	client := meta.(*apigee.EdgeClient)
 
 	targetServerData, _, err := client.TargetServers.Get(d.Get("name").(string), d.Get("env").(string))
@@ -145,15 +145,15 @@ func resourceTargetServersRead(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceTargetServersUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceTargetServerUpdate(d *schema.ResourceData, meta interface{}) error {
 
-	log.Print("[DEBUG] resourceTargetServersUpdate START")
+	log.Print("[DEBUG] resourceTargetServerUpdate START")
 
 	client := meta.(*apigee.EdgeClient)
 
 	targetServerData, err := setTargetServerData(d)
 	if err != nil {
-		return fmt.Errorf("resourceTargetServersUpdate error in setTargetServerData: %s", err.Error())
+		return fmt.Errorf("resourceTargetServerUpdate error in setTargetServerData: %s", err.Error())
 	}
 
 	_, _, e := client.TargetServers.Update(targetServerData, d.Get("env").(string))
@@ -161,12 +161,12 @@ func resourceTargetServersUpdate(d *schema.ResourceData, meta interface{}) error
 		return e
 	}
 
-	return resourceTargetServersRead(d, meta)
+	return resourceTargetServerRead(d, meta)
 }
 
-func resourceTargetServersDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceTargetServerDelete(d *schema.ResourceData, meta interface{}) error {
 
-	log.Print("[DEBUG] resourceTargetServersDelete START")
+	log.Print("[DEBUG] resourceTargetServerDelete START")
 	client := meta.(*apigee.EdgeClient)
 
 	_, err := client.TargetServers.Delete(d.Get("name").(string), d.Get("env").(string))
@@ -212,30 +212,4 @@ func setTargetServerData(d *schema.ResourceData) (apigee.TargetServer, error) {
 	}
 
 	return targetServer, nil
-}
-
-func getStringList(listName string, d *schema.ResourceData) []string {
-
-	stringList := []string{}
-
-	if attr, ok := d.GetOk(listName); ok {
-		for _, s := range attr.([]interface{}) {
-			if s != nil {
-				stringList = append(stringList, s.(string))
-			}
-		}
-	}
-
-	return stringList
-}
-
-func flattenStringList(list []string) []interface{} {
-
-	vs := make([]interface{}, 0, len(list))
-
-	for _, v := range list {
-		vs = append(vs, &v)
-	}
-
-	return vs
 }

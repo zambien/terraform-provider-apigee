@@ -2,9 +2,7 @@
 
 A Terraform Apigee provider.
 
-Allows Terraform deployments and management of Apigee API proxies and target servers.
-
-I plan to create the Product resource next and will see where interest goes from there.
+Allows Terraform deployments and management of Apigee API proxies, deployments, products, and target servers.
 
 ## TFVARS for provider
 
@@ -42,6 +40,32 @@ resource "apigee_api_proxy" "helloworld_proxy" {
    bundle_sha   = "${data.archive_file.bundle.output_sha}"  # The SHA is used to detect changes for plan/apply.
 }
 
+# A product
+resource "apigee_product" "helloworld_product" {
+   name = "helloworld-product"
+   display_name = "helloworld-product" # The provider will assume display name is the same as name if you do not set it.
+   description = "no one ever fills this out"
+   approval_type = "auto"
+
+   api_resources = ["/**"]
+   proxies = ["${apigee_api_proxy.helloworld_proxy.name}"]
+
+   # 1000 requests every 2 minutes
+   quota = "1000"
+   quota_interval = "2"
+   quota_time_unit = "minute"
+
+   # See here: http://docs.apigee.com/api-services/content/working-scopes
+   scopes = [""]
+
+   attributes {
+      access = "public" # this one is needed to expose the proxy.  The rest of the attributes are custom attrs.  Weird.
+
+      custom1 = "customval1"
+      custom2 = "customval2"
+   }
+}
+
 # A proxy deployment
 resource "apigee_api_proxy_deployment" "helloworld_proxy_deployment" {
    proxy_name   = "${apigee_api_proxy.helloworld_proxy.name}"
@@ -51,7 +75,7 @@ resource "apigee_api_proxy_deployment" "helloworld_proxy_deployment" {
 }
 
 # A target server
-resource "apigee_target_servers" "helloworld_target_server" {
+resource "apigee_target_server" "helloworld_target_server" {
    name = "helloworld_target_server"
    host = "somehost.thatexists.com"
    env = "${var.env}"

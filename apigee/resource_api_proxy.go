@@ -104,7 +104,7 @@ func resourceApiProxyUpdate(d *schema.ResourceData, meta interface{}) error {
 	if d.HasChange("bundle_sha") {
 		log.Printf("[INFO] resourceApiProxyUpdate bundle_sha changed to: %#v\n", d.Get("bundle_sha"))
 	}
-	
+
 	proxyRev, _, e := client.Proxies.Import(d.Get("name").(string), d.Get("bundle").(string))
 	if e != nil {
 		return fmt.Errorf("error creating api_proxy: %s", e.Error())

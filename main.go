@@ -1,9 +1,9 @@
 package main
 
 import (
+	"./apigee"
 	"github.com/hashicorp/terraform/plugin"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/zambien/terraform-provider-apigee/apigee"
 )
 
 func main() {
