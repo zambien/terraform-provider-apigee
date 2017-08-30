@@ -60,8 +60,8 @@ func resourceApiProxyDeploymentRead(d *schema.ResourceData, meta interface{}) (e
 	found := false
 
 	if deployments, _, err := client.Proxies.GetDeployments(d.Get("proxy_name").(string)); err != nil {
-
-		log.Printf("[ERROR] resourceApiProxyDeploymentRead error getting deployments: %s", e.Error())
+		d.SetId("")
+		log.Printf("[ERROR] resourceApiProxyDeploymentRead error getting deployments: %s", err.Error())
 
 	} else {
 
