@@ -4,6 +4,31 @@ A Terraform Apigee provider.
 
 Allows Terraform deployments and management of Apigee API proxies, deployments, products, and target servers.
 
+## Installation
+
+To to releases and pull the appropriate release for your system: https://github.com/zambien/terraform-provider-apigee/releases
+
+See here for info on how to install the plugin:
+
+https://www.terraform.io/docs/plugins/basics.html
+
+An example of how to do this would be:
+
+1. Make a terraform providers folder in home
+`mkdir -p ~/terraform-providers`
+
+2. Download plugin for linux into your home directory
+`curl -L https://github.com/zambien/terraform-provider-apigee/releases/download/v0.0.5/terraform-provider-apigee-v0.0.5-linux64 -o ~/terraform-providers/terraform-provider-apigee-v0.0.5-linux64`
+
+3. Add the providers clause if you don't already have one.  Warning, this command will overwrite your .terraformrc!
+```
+cat << EOF > ~/.terraformrc
+providers {
+    apigee = "$HOME/terraform-providers/terraform-provider-apigee-v0.0.5-linux64"
+}
+EOF
+```
+
 ## TFVARS for provider
 
 ```
