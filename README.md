@@ -46,6 +46,7 @@ variable "org" { default = "my-really-cool-apigee-org-name" }
 variable "env" { default = "test" }
 
 provider "apigee" {
+  base_uri      = "https://someinternalapigeemanagment.yourdomain.suffix"      # optional... defaults to Apigee's SaaS
   org           = "${var.org}"
   user          = "some_dude@domain.suffix"
   password      = "did_u_pick_a_strong_one?"                # Generally speaking, don't put passwords in your tf files... pull from a Vault or something.

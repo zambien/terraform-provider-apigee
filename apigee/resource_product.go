@@ -113,7 +113,11 @@ func resourceProductRead(d *schema.ResourceData, meta interface{}) error {
 	scopes := flattenStringList(ProductData.Scopes)
 
 	d.Set("name", ProductData.Name)
-	d.Set("display_name", ProductData.DisplayName)
+	if ProductData.DisplayName == "" {
+		d.Set("display_name", ProductData.Name)
+	} else {
+		d.Set("display_name", ProductData.DisplayName)
+	}
 	d.Set("description", ProductData.Description)
 	d.Set("approval_type", ProductData.ApprovalType)
 	d.Set("attributes", ProductData.Attributes)
