@@ -37,7 +37,7 @@ func attributesFromMap(attributes map[string]interface{}) []apigee.Attribute {
 
 	for k, v := range attributes {
 		t := apigee.Attribute{
-			Name:   k,
+			Name:  k,
 			Value: v.(string),
 		}
 		result = append(result, t)

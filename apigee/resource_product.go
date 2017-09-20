@@ -1,12 +1,12 @@
 package apigee
 
 import (
+	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/satori/go.uuid"
 	"github.com/zambien/go-apigee-edge"
 	"log"
 	"strings"
-	"github.com/satori/go.uuid"
-	"fmt"
 )
 
 func resourceProduct() *schema.Resource {
@@ -25,6 +25,7 @@ func resourceProduct() *schema.Resource {
 			"display_name": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"approval_type": {
 				Type:     schema.TypeString,
@@ -65,7 +66,6 @@ func resourceProduct() *schema.Resource {
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
-
 		},
 	}
 }
@@ -73,7 +73,6 @@ func resourceProduct() *schema.Resource {
 func resourceProductCreate(d *schema.ResourceData, meta interface{}) error {
 
 	log.Print("[DEBUG] resourceProductCreate START")
-
 
 	client := meta.(*apigee.EdgeClient)
 
@@ -113,11 +112,13 @@ func resourceProductRead(d *schema.ResourceData, meta interface{}) error {
 	scopes := flattenStringList(ProductData.Scopes)
 
 	d.Set("name", ProductData.Name)
+
 	if ProductData.DisplayName == "" {
 		d.Set("display_name", ProductData.Name)
 	} else {
 		d.Set("display_name", ProductData.DisplayName)
 	}
+	d.Set("display_name", ProductData.DisplayName)
 	d.Set("description", ProductData.Description)
 	d.Set("approval_type", ProductData.ApprovalType)
 	d.Set("attributes", ProductData.Attributes)
@@ -153,7 +154,6 @@ func resourceProductUpdate(d *schema.ResourceData, meta interface{}) error {
 func resourceProductDelete(d *schema.ResourceData, meta interface{}) error {
 
 	log.Print("[DEBUG] resourceProductDelete START")
-
 
 	client := meta.(*apigee.EdgeClient)
 
@@ -194,17 +194,17 @@ func setProductData(d *schema.ResourceData) (apigee.Product, error) {
 	}
 
 	Product := apigee.Product{
-		Name:    		d.Get("name").(string),
-		DisplayName:    d.Get("display_name").(string),
-		ApprovalType: 	d.Get("approval_type").(string),
-		Attributes:    	attributes,
-		Description:	d.Get("description").(string),
-		ApiResources:	apiResources,
-		Proxies:		proxies,
-		Quota:			d.Get("quota").(string),
-		QuotaInterval:	d.Get("quota_interval").(string),
-		QuotaTimeUnit:	d.Get("quota_time_unit").(string),
-		Scopes:			scopes,
+		Name:          d.Get("name").(string),
+		DisplayName:   d.Get("display_name").(string),
+		ApprovalType:  d.Get("approval_type").(string),
+		Attributes:    attributes,
+		Description:   d.Get("description").(string),
+		ApiResources:  apiResources,
+		Proxies:       proxies,
+		Quota:         d.Get("quota").(string),
+		QuotaInterval: d.Get("quota_interval").(string),
+		QuotaTimeUnit: d.Get("quota_time_unit").(string),
+		Scopes:        scopes,
 	}
 
 	return Product, nil
