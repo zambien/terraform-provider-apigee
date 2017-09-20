@@ -31,14 +31,11 @@ func TestProvider_impl(t *testing.T) {
 }
 
 func testAccPreCheck(t *testing.T) {
-	if v := os.Getenv("APIGEE_BASE_URI"); v == "" {
-		t.Fatal("APIGEE_BASE_URI must be set for acceptance tests")
+	if v := os.Getenv("APIGEE_USER"); v == "" {
+		t.Fatal("APIGEE_USER must be set for acceptance tests")
 	}
-	if v := os.Getenv("APIGEE_USER_EMAIL"); v == "" {
-		t.Fatal("APIGEE_USER_EMAIL must be set for acceptance tests")
-	}
-	if v := os.Getenv("APIGEE_PASS"); v == "" {
-		t.Fatal("APIGEE_PASS must be set for acceptance tests")
+	if v := os.Getenv("APIGEE_PASSWORD"); v == "" {
+		t.Fatal("APIGEE_PASSWORD must be set for acceptance tests")
 	}
 	if v := os.Getenv("APIGEE_ORG"); v == "" {
 		t.Fatal("APIGEE_ORG must be set for acceptance tests")
