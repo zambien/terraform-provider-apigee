@@ -18,13 +18,13 @@ An example of how to do this would be:
 `mkdir -p ~/terraform-providers`
 
 2. Download plugin for linux into your home directory
-`curl -L https://github.com/zambien/terraform-provider-apigee/releases/download/v0.0.6/terraform-provider-apigee-v0.0.6-linux64 -o ~/terraform-providers/terraform-provider-apigee-v0.0.6-linux64`
+`curl -L https://github.com/zambien/terraform-provider-apigee/releases/download/v0.0.7/terraform-provider-apigee-v0.0.7-linux64 -o ~/terraform-providers/terraform-provider-apigee-v0.0.7-linux64`
 
 3. Add the providers clause if you don't already have one.  Warning, this command will overwrite your .terraformrc!
 ```
 cat << EOF > ~/.terraformrc
 providers {
-    apigee = "$HOME/terraform-providers/terraform-provider-apigee-v0.0.6-linux64"
+    apigee = "$HOME/terraform-providers/terraform-provider-apigee-v0.0.7-linux64"
 }
 EOF
 ```
@@ -125,6 +125,31 @@ resource "apigee_target_server" "helloworld_target_server" {
 
 ## Contributions
 Please read [our contribution guidelines.](https://github.com/zambien/terraform-provider-apigee/blob/master/.github/CONTRIBUTING.md)
+
+## Building
+Should be buildable on any terraform version at or higher than 0.9.3.  To build you would use the standard go build command.  For example for MacOS:
+
+`GOOS=darwin GOARCH=amd64 go build -o terraform-provider-apigee-v0.0.X-darwin64`
+
+Windows:
+`GOOS=windows GOARCH=amd64 go build -o terraform-provider-apigee-v0.0.X-win64`
+
+Linux:
+`GOOS=linux GOARCH=amd64 go build -o terraform-provider-apigee-v0.0.X-linux64`
+
+## Testing
+To run tests, use the following commands.  Note that you will need your credentials setup for the tests to run.
+
+Set env vars for test:
+```
+APIGEE_ORG="my-really-cool-apigee-org-name"
+APIGEE_USER="some_dude@domain.suffix"
+APIGEE_PASSWORD="for_the_love_of_pete_please_use_a_strong_password"
+```
+
+From the project root:
+`TF_ACC=1 go test -v ./apigee`
+
 
 ## Important Known Issues
 

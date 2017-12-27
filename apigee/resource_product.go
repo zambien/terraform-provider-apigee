@@ -81,12 +81,14 @@ func resourceProductCreate(d *schema.ResourceData, meta interface{}) error {
 
 	ProductData, err := setProductData(d)
 	if err != nil {
-		return fmt.Errorf("resourceProductCreate error in setProductData: %s", err.Error())
+		log.Printf("[ERROR] resourceProductCreate error in setProductData: %s", err.Error())
+		return fmt.Errorf("[ERROR] resourceProductCreate error in setProductData: %s", err.Error())
 	}
 
 	_, _, e := client.Products.Create(ProductData)
 	if e != nil {
-		return e
+		log.Printf("[ERROR] resourceProductCreate error in product creation: %s", e.Error())
+		return fmt.Errorf("[ERROR] resourceProductCreate error in product creation: %s", e.Error())
 	}
 
 	return resourceProductRead(d, meta)
@@ -99,12 +101,15 @@ func resourceProductRead(d *schema.ResourceData, meta interface{}) error {
 
 	ProductData, _, err := client.Products.Get(d.Get("name").(string))
 	if err != nil {
-		d.SetId("")
+		log.Printf("[ERROR] resourceProductRead error getting products: %s", err.Error())
 		if strings.Contains(err.Error(), "404 ") {
+			log.Printf("[DEBUG] resourceProductRead 404 encountered.  Removing state for product: %#v", d.Get("name").(string))
+			d.SetId("")
 			return nil
+		} else {
+			log.Printf("[ERROR] resourceProductRead error error getting products: %s", err.Error())
+			return fmt.Errorf("[ERROR] resourceProductRead error getting products: %s", err.Error())
 		}
-		return err
-
 	}
 
 	apiResources := flattenStringList(ProductData.ApiResources)
@@ -140,12 +145,14 @@ func resourceProductUpdate(d *schema.ResourceData, meta interface{}) error {
 
 	ProductData, err := setProductData(d)
 	if err != nil {
-		return fmt.Errorf("resourceProductUpdate error in setProductData: %s", err.Error())
+		log.Printf("[ERROR] resourceProductUpdate error in setProductData: %s", err.Error())
+		return fmt.Errorf("[ERROR] resourceProductUpdate error in setProductData: %s", err.Error())
 	}
 
 	_, _, e := client.Products.Update(ProductData)
 	if e != nil {
-		return e
+		log.Printf("[ERROR] resourceProductUpdate error in product update: %s", e.Error())
+		return fmt.Errorf("[ERROR] resourceProductUpdate error in product update: %s", e.Error())
 	}
 
 	return resourceProductRead(d, meta)
@@ -159,7 +166,8 @@ func resourceProductDelete(d *schema.ResourceData, meta interface{}) error {
 
 	_, err := client.Products.Delete(d.Get("name").(string))
 	if err != nil {
-		return err
+		log.Printf("[ERROR] resourceProductDelete error in product delete: %s", err.Error())
+		return fmt.Errorf("[ERROR] resourceProductDelete error in product delete: %s", err.Error())
 	}
 
 	return nil

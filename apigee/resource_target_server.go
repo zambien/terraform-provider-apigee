@@ -99,12 +99,14 @@ func resourceTargetServerCreate(d *schema.ResourceData, meta interface{}) error 
 
 	targetServerData, err := setTargetServerData(d)
 	if err != nil {
-		return fmt.Errorf("resourceTargetServerCreate error in setTargetServerData: %s", err.Error())
+		log.Printf("[ERROR] resourceTargetServerCreate error in setTargetServerData: %s", err.Error())
+		return fmt.Errorf("[ERROR] resourceTargetServerCreate error in setTargetServerData: %s", err.Error())
 	}
 
 	_, _, e := client.TargetServers.Create(targetServerData, d.Get("env").(string))
 	if e != nil {
-		return e
+		log.Printf("[ERROR] resourceTargetServerCreate error in create: %s", e.Error())
+		return fmt.Errorf("[ERROR] resourceTargetServerCreate error in create: %s", e.Error())
 	}
 
 	return resourceTargetServerRead(d, meta)
@@ -117,12 +119,14 @@ func resourceTargetServerRead(d *schema.ResourceData, meta interface{}) error {
 
 	targetServerData, _, err := client.TargetServers.Get(d.Get("name").(string), d.Get("env").(string))
 	if err != nil {
-		d.SetId("")
+		log.Printf("[ERROR] resourceTargetServerRead error getting target servers: %s", err.Error())
 		if strings.Contains(err.Error(), "404 ") {
+			log.Printf("[DEBUG] resourceTargetServerRead 404 encountered.  Removing state for target server: %#v", d.Get("name").(string))
+			d.SetId("")
 			return nil
+		} else {
+			return fmt.Errorf("[ERROR] resourceTargetServerRead error getting target servers: %s", err.Error())
 		}
-		return err
-
 	}
 
 	d.Set("name", targetServerData.Name)
@@ -153,12 +157,14 @@ func resourceTargetServerUpdate(d *schema.ResourceData, meta interface{}) error 
 
 	targetServerData, err := setTargetServerData(d)
 	if err != nil {
-		return fmt.Errorf("resourceTargetServerUpdate error in setTargetServerData: %s", err.Error())
+		log.Printf("[ERROR] resourceTargetServerUpdate error in setTargetServerData: %s", err.Error())
+		return fmt.Errorf("[ERROR] resourceTargetServerUpdate error in setTargetServerData: %s", err.Error())
 	}
 
 	_, _, e := client.TargetServers.Update(targetServerData, d.Get("env").(string))
 	if e != nil {
-		return e
+		log.Printf("[ERROR] resourceTargetServerUpdate error in update: %s", e.Error())
+		return fmt.Errorf("[ERROR] resourceTargetServerUpdate error in update: %s", e.Error())
 	}
 
 	return resourceTargetServerRead(d, meta)
@@ -171,7 +177,8 @@ func resourceTargetServerDelete(d *schema.ResourceData, meta interface{}) error 
 
 	_, err := client.TargetServers.Delete(d.Get("name").(string), d.Get("env").(string))
 	if err != nil {
-		return err
+		log.Printf("[ERROR] resourceTargetServerDelete error in delete: %s", err.Error())
+		return fmt.Errorf("[ERROR] resourceTargetServerDelete error in delete: %s", err.Error())
 	}
 
 	return nil
