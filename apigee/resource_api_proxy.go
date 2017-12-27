@@ -32,8 +32,8 @@ func resourceApiProxy() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			//bundle_sha is not used but is a workaround for: https://github.com/hashicorp/terraform/issues/15857
-			"output_sha": {
+			//revision_sha is used as a workaround for: https://github.com/hashicorp/terraform/issues/15857
+			"revision_sha": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -53,16 +53,17 @@ func resourceApiProxyCreate(d *schema.ResourceData, meta interface{}) error {
 
 	u1 := uuid.NewV4()
 
-	proxyRev, _, e := client.Proxies.Import(d.Get("name").(string), d.Get("bundle").(string))
+	proxyRev, _, err := client.Proxies.Import(d.Get("name").(string), d.Get("bundle").(string))
 
-	if e != nil {
-		return fmt.Errorf("error creating api_proxy: %s", e.Error())
+	if err != nil {
+		log.Printf("[ERROR] resourceApiProxyCreate error importing api_proxy: %s", err.Error())
+		return fmt.Errorf("[ERROR] resourceApiProxyCreate error importing api_proxy: %s", err.Error())
 	}
 
 	d.SetId(u1.String())
 	d.Set("name", d.Get("name").(string))
 	d.Set("revision", proxyRev.Revision.String())
-	d.Set("output_sha", d.Get("bundle_sha").(string))
+	d.Set("revision_sha", d.Get("bundle_sha").(string))
 
 	return resourceApiProxyRead(d, meta)
 }
@@ -75,16 +76,21 @@ func resourceApiProxyRead(d *schema.ResourceData, meta interface{}) error {
 
 	u, _, err := client.Proxies.Get(d.Get("name").(string))
 	if err != nil {
-		d.SetId("")
+		log.Printf("[ERROR] resourceApiProxyRead error reading proxies: %s", err.Error())
 		if strings.Contains(err.Error(), "404 ") {
+			log.Printf("[DEBUG] resourceApiProxyRead 404 encountered.  Removing state for proxy: %#v", d.Get("name").(string))
+			d.SetId("")
 			return nil
+		} else {
+			return fmt.Errorf("[ERROR] resourceApiProxyRead error reading proxies: %s", err.Error())
 		}
-		return err
 	}
 
 	latest_rev := strconv.Itoa(len(u.Revisions))
 
-	d.Set("output_sha", d.Get("bundle_sha").(string))
+	log.Printf("[DEBUG] resourceApiProxyRead.  revision_sha before: %#v", d.Get("revision_sha").(string))
+	d.Set("revision_sha", d.Get("bundle_sha").(string))
+	log.Printf("[DEBUG] resourceApiProxyRead.  revision_sha after: %#v", d.Get("revision_sha").(string))
 	d.Set("revision", latest_rev)
 	d.Set("name", u.Name)
 
@@ -105,13 +111,14 @@ func resourceApiProxyUpdate(d *schema.ResourceData, meta interface{}) error {
 		log.Printf("[INFO] resourceApiProxyUpdate bundle_sha changed to: %#v\n", d.Get("bundle_sha"))
 	}
 
-	proxyRev, _, e := client.Proxies.Import(d.Get("name").(string), d.Get("bundle").(string))
-	if e != nil {
-		return fmt.Errorf("error creating api_proxy: %s", e.Error())
+	proxyRev, _, err := client.Proxies.Import(d.Get("name").(string), d.Get("bundle").(string))
+	if err != nil {
+		log.Printf("[ERROR] resourceApiProxyUpdate error importing api_proxy: %s", err.Error())
+		return fmt.Errorf("[ERROR] resourceApiProxyUpdate error importing api_proxy: %s", err.Error())
 	}
 
 	d.Set("revision", proxyRev.Revision.String())
-	d.Set("output_sha", d.Get("bundle_sha").(string))
+	d.Set("revision_sha", d.Get("bundle_sha").(string))
 
 	return resourceApiProxyRead(d, meta)
 }
@@ -124,7 +131,8 @@ func resourceApiProxyDelete(d *schema.ResourceData, meta interface{}) error {
 
 	_, _, err := client.Proxies.Delete(d.Get("name").(string))
 	if err != nil {
-		return err
+		log.Printf("[ERROR] resourceApiProxyDelete error deleting api_proxy: %s", err.Error())
+		return fmt.Errorf("[ERROR] resourceApiProxyDelete error deleting api_proxy: %s", err.Error())
 	}
 
 	return nil
