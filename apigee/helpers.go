@@ -31,6 +31,17 @@ func getStringList(listName string, d *schema.ResourceData) []string {
 	return stringList
 }
 
+func apiProductsListFromCredentials(credentialApiProducts []apigee.CredentialApiProduct) []string {
+
+	stringList := []string{}
+
+	for _, apiProduct := range credentialApiProducts {
+		stringList = append(stringList, apiProduct.ApiProduct)
+	}
+
+	return stringList
+}
+
 func attributesFromMap(attributes map[string]interface{}) []apigee.Attribute {
 
 	result := make([]apigee.Attribute, 0, len(attributes))

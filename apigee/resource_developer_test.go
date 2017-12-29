@@ -19,9 +19,9 @@ func TestAccDeveloper_Updated(t *testing.T) {
 			resource.TestStep{
 				Config: testAccCheckDeveloperConfigRequired,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDeveloperExists("apigee_developer.foo_developer", "foo_email@test.com"),
+					testAccCheckDeveloperExists("apigee_developer.foo_developer", "foo_developer_test_email@test.com"),
 					resource.TestCheckResourceAttr(
-						"apigee_developer.foo_developer", "email", "foo_email@test.com"),
+						"apigee_developer.foo_developer", "email", "foo_developer_test_email@test.com"),
 					resource.TestCheckResourceAttr(
 						"apigee_developer.foo_developer", "first_name", "foo"),
 					resource.TestCheckResourceAttr(
@@ -34,9 +34,9 @@ func TestAccDeveloper_Updated(t *testing.T) {
 			resource.TestStep{
 				Config: testAccCheckDeveloperConfigUpdated,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDeveloperExists("apigee_developer.foo_developer", "foo_email-updated@test.com"),
+					testAccCheckDeveloperExists("apigee_developer.foo_developer", "foo_developer_test_email_updated@test.com"),
 					resource.TestCheckResourceAttr(
-						"apigee_developer.foo_developer", "email", "foo_email-updated@test.com"),
+						"apigee_developer.foo_developer", "email", "foo_developer_test_email_updated@test.com"),
 					resource.TestCheckResourceAttr(
 						"apigee_developer.foo_developer", "first_name", "foo-updated"),
 					resource.TestCheckResourceAttr(
@@ -78,7 +78,7 @@ func testAccCheckDeveloperExists(n string, email string) resource.TestCheckFunc 
 
 const testAccCheckDeveloperConfigRequired = `
 resource "apigee_developer" "foo_developer" {
-   email = "foo_email@test.com"
+   email = "foo_developer_test_email@test.com"
    first_name = "foo"
    last_name = "test"
    user_name = "footest"
@@ -87,7 +87,7 @@ resource "apigee_developer" "foo_developer" {
 
 const testAccCheckDeveloperConfigUpdated = `
 resource "apigee_developer" "foo_developer" {
-   email = "foo_email-updated@test.com"
+   email = "foo_developer_test_email_updated@test.com"
    first_name = "foo-updated"
    last_name = "test-updated"
    user_name = "footest-updated"
