@@ -2,11 +2,11 @@
 
 A Terraform Apigee provider.
 
-Allows Terraform deployments and management of Apigee API proxies, deployments, products, and target servers.
+Allows Terraform deployments and management of Apigee API proxies, deployments, products, companies/developers/apps, and target servers.
 
 ## Installation
 
-To to releases and pull the appropriate release for your system: https://github.com/zambien/terraform-provider-apigee/releases
+Download the appropriate release for your system: https://github.com/zambien/terraform-provider-apigee/releases
 
 See here for info on how to install the plugin:
 
@@ -82,7 +82,7 @@ resource "apigee_product" "helloworld_product" {
    quota_time_unit = "minute"
 
    # See here: http://docs.apigee.com/api-services/content/working-scopes
-   scopes = [""]
+   scopes = ["READ"]
 
    attributes {
       access = "public" # this one is needed to expose the proxy.  The rest of the attributes are custom attrs.  Weird.
@@ -121,6 +121,56 @@ resource "apigee_target_server" "helloworld_target_server" {
    }
 }
 
+# A developer
+resource "apigee_developer" "helloworld_developer" {
+   email = "helloworld_email@test.com"                                  # required
+   first_name = "helloworld"                                            # required
+   last_name = "thelloworld1"                                           # required
+   user_name = "helloworld1"                                            # required
+
+   attributes {                                                         # optional
+      DisplayName = "my_awesome_app_updated"
+      Notes = "notes_for_developer_app_updated"
+	  custom_attribute_name = "custom_attribute_value"
+   }
+}
+
+# A developer app
+
+resource "apigee_developer_app" "helloworld_developer_app" {
+   name = "helloworld_developer_app"                                    # required
+   developer_email = "${apigee_developer.helloworld_developer.email}"   # developer email must exist
+   api_products = ["${apigee_product.helloworld_product.name}"]         # list must exist
+   scopes = ["READ"]                                                    # scopes must exist in the api_product
+   callback_url = "https://www.google.com"                              # optional
+   key_expires_in = 2592000000                                          # optional
+
+   attributes {                                                         # optional
+      DisplayName = "my_awesome_developer_app"
+      Notes = "notes_for_awesome_developer_app"
+	  custom_attribute_name = "custom_attribute_value"
+   }
+}
+
+# A company
+resource "apigee_company" "helloworld_company" {
+   name = "helloworld_company"                                          # required
+   display_name = "some longer description for company"                 # optional
+
+   attributes {                                                         # optional
+      DisplayName = "my-awesome-company"
+   }
+}
+
+# A company app
+resource "apigee_company_app" "helloworld_company_app" {
+   name = "helloworld_company_app_name"
+   company_name = "${apigee_company.helloworld_company.name}"
+   api_products = ["${apigee_product.helloworld_product.name}"]
+   scopes = ["READ"]
+   callback_url = "https://www.google.com"
+}
+
 ```
 
 ## Contributions
@@ -149,6 +199,13 @@ APIGEE_PASSWORD="for_the_love_of_pete_please_use_a_strong_password"
 
 From the project root:
 `TF_ACC=1 go test -v ./apigee`
+
+To run a single test:
+`TF_ACC=1 go test -v ./apigee -run=TestAccDeveloperApp_Updated`
+
+Running in debug mode and capturing debug in a file:
+`rm -f /tmp/testlog.txt && TF_ACC=1 TF_LOG=DEBUG TF_LOG_PATH=/tmp/testlog.txt go test -v ./apigee`
+
 
 
 ## Important Known Issues
