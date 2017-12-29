@@ -121,6 +121,19 @@ resource "apigee_target_server" "helloworld_target_server" {
    }
 }
 
+# A developer
+resource "apigee_developer" "helloworld_developer" {
+   email = "helloworld_email@test.com"
+   first_name = "helloworld"
+   last_name = "thelloworld1"
+   user_name = "helloworld1"
+   attributes {
+      DisplayName = "my_awesome_app_updated"
+      Notes = "notes_for_developer_app_updated"
+	  custom_attribute_name = "custom_attribute_value_updated"
+   }
+}
+
 ```
 
 ## Contributions
