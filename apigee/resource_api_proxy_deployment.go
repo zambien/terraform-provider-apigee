@@ -125,7 +125,8 @@ func resourceApiProxyDeploymentCreate(d *schema.ResourceData, meta interface{}) 
 		}
 	}
 
-	d.SetId(uuid.NewV4().String())
+	id, _ := uuid.NewV4()
+	d.SetId(id.String())
 	d.Set("revision", proxyDep.Revision.String())
 
 	return resourceApiProxyDeploymentRead(d, meta)

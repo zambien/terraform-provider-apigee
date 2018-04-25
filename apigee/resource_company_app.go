@@ -63,7 +63,7 @@ func resourceCompanyAppCreate(d *schema.ResourceData, meta interface{}) error {
 
 	client := meta.(*apigee.EdgeClient)
 
-	u1 := uuid.NewV4()
+	u1, _ := uuid.NewV4()
 	d.SetId(u1.String())
 
 	CompanyAppData, err := setCompanyAppData(d)

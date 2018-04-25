@@ -51,7 +51,7 @@ func resourceApiProxyCreate(d *schema.ResourceData, meta interface{}) error {
 
 	client := meta.(*apigee.EdgeClient)
 
-	u1 := uuid.NewV4()
+	u1, _ := uuid.NewV4()
 
 	proxyRev, _, err := client.Proxies.Import(d.Get("name").(string), d.Get("bundle").(string))
 
