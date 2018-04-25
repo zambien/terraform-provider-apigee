@@ -76,7 +76,7 @@ func resourceProductCreate(d *schema.ResourceData, meta interface{}) error {
 
 	client := meta.(*apigee.EdgeClient)
 
-	u1 := uuid.NewV4()
+	u1, _ := uuid.NewV4()
 	d.SetId(u1.String())
 
 	ProductData, err := setProductData(d)

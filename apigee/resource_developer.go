@@ -61,7 +61,7 @@ func resourceDeveloperCreate(d *schema.ResourceData, meta interface{}) error {
 
 	client := meta.(*apigee.EdgeClient)
 
-	u1 := uuid.NewV4()
+	u1, _ := uuid.NewV4()
 	d.SetId(u1.String())
 
 	DeveloperData, err := setDeveloperData(d)
@@ -162,12 +162,12 @@ func setDeveloperData(d *schema.ResourceData) (apigee.Developer, error) {
 	}
 
 	Developer := apigee.Developer{
-		Email:          d.Get("email").(string),
-		FirstName:		d.Get("first_name").(string),
-		LastName:		d.Get("last_name").(string),
-		UserName:		d.Get("user_name").(string),
-		Attributes:		attributes,
-		Apps:			apps,
+		Email:      d.Get("email").(string),
+		FirstName:  d.Get("first_name").(string),
+		LastName:   d.Get("last_name").(string),
+		UserName:   d.Get("user_name").(string),
+		Attributes: attributes,
+		Apps:       apps,
 	}
 
 	return Developer, nil

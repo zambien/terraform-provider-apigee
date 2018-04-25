@@ -6,9 +6,9 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/zambien/go-apigee-edge"
 	"log"
+	"regexp"
 	"strings"
 	"testing"
-	"regexp"
 )
 
 func TestAccDeveloperApp_Updated(t *testing.T) {

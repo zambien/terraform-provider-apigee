@@ -71,7 +71,7 @@ func resourceDeveloperAppCreate(d *schema.ResourceData, meta interface{}) error 
 
 	client := meta.(*apigee.EdgeClient)
 
-	u1 := uuid.NewV4()
+	u1, _ := uuid.NewV4()
 	d.SetId(u1.String())
 
 	DeveloperAppData, err := setDeveloperAppData(d)
@@ -186,12 +186,12 @@ func setDeveloperAppData(d *schema.ResourceData) (apigee.DeveloperApp, error) {
 	}
 
 	DeveloperApp := apigee.DeveloperApp{
-		Name:          	d.Get("name").(string),
-		Attributes:		attributes,
-		ApiProducts:	apiProducts,
-		KeyExpiresIn:	d.Get("key_expires_in").(int),
-		Scopes:			scopes,
-		CallbackUrl:	d.Get("callback_url").(string),
+		Name:         d.Get("name").(string),
+		Attributes:   attributes,
+		ApiProducts:  apiProducts,
+		KeyExpiresIn: d.Get("key_expires_in").(int),
+		Scopes:       scopes,
+		CallbackUrl:  d.Get("callback_url").(string),
 	}
 
 	return DeveloperApp, nil

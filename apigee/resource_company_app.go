@@ -63,7 +63,7 @@ func resourceCompanyAppCreate(d *schema.ResourceData, meta interface{}) error {
 
 	client := meta.(*apigee.EdgeClient)
 
-	u1 := uuid.NewV4()
+	u1, _ := uuid.NewV4()
 	d.SetId(u1.String())
 
 	CompanyAppData, err := setCompanyAppData(d)
@@ -178,11 +178,11 @@ func setCompanyAppData(d *schema.ResourceData) (apigee.CompanyApp, error) {
 	}
 
 	CompanyApp := apigee.CompanyApp{
-		Name:          	d.Get("name").(string),
-		Attributes:		attributes,
-		ApiProducts:	apiProducts,
-		Scopes:			scopes,
-		CallbackUrl:	d.Get("callback_url").(string),
+		Name:        d.Get("name").(string),
+		Attributes:  attributes,
+		ApiProducts: apiProducts,
+		Scopes:      scopes,
+		CallbackUrl: d.Get("callback_url").(string),
 	}
 
 	return CompanyApp, nil
