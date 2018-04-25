@@ -3,8 +3,17 @@ GOFMT_FILES?=$$(find . -name '*.go' |grep -v vendor)
 
 default: build
 
-build: fmtcheck
-	go install
+build: vendor fmtcheck
+	@rm -rf build/
+	@mkdir -p build/
+	CGO_ENABLED=0 go build -ldflags '-w -extldflags "-static"' -o build/terraform-provider-apigee
+
+GLIDE := $(shell command -v glide 2> /dev/null)
+ifndef GLIDE
+$(error "glide is not available. Install using `curl https://glide.sh/get | sh`")
+endif
+vendor: glide.yaml ## Install vendor dependencies
+	glide update --no-recursive
 
 test: fmtcheck
 	go test -i $(TEST) || exit 1
@@ -32,9 +41,6 @@ fmtcheck:
 errcheck:
 	@sh -c "'$(CURDIR)/scripts/errcheck.sh'"
 
-vendor-status:
-	@govendor status
-
 test-compile:
 	@if [ "$(TEST)" = "./..." ]; then \
 		echo "ERROR: Set TEST to a specific package. For example,"; \
@@ -43,4 +49,4 @@ test-compile:
 	fi
 	go test -c $(TEST) $(TESTARGS)
 
-.PHONY: build test testacc vet fmt fmtcheck errcheck vendor-status test-compile
+.PHONY: build test testacc vet fmt fmtcheck errcheck test-compile
