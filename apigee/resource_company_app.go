@@ -178,11 +178,11 @@ func setCompanyAppData(d *schema.ResourceData) (apigee.CompanyApp, error) {
 	}
 
 	CompanyApp := apigee.CompanyApp{
-		Name:          	d.Get("name").(string),
-		Attributes:		attributes,
-		ApiProducts:	apiProducts,
-		Scopes:			scopes,
-		CallbackUrl:	d.Get("callback_url").(string),
+		Name:        d.Get("name").(string),
+		Attributes:  attributes,
+		ApiProducts: apiProducts,
+		Scopes:      scopes,
+		CallbackUrl: d.Get("callback_url").(string),
 	}
 
 	return CompanyApp, nil

@@ -162,12 +162,12 @@ func setDeveloperData(d *schema.ResourceData) (apigee.Developer, error) {
 	}
 
 	Developer := apigee.Developer{
-		Email:          d.Get("email").(string),
-		FirstName:		d.Get("first_name").(string),
-		LastName:		d.Get("last_name").(string),
-		UserName:		d.Get("user_name").(string),
-		Attributes:		attributes,
-		Apps:			apps,
+		Email:      d.Get("email").(string),
+		FirstName:  d.Get("first_name").(string),
+		LastName:   d.Get("last_name").(string),
+		UserName:   d.Get("user_name").(string),
+		Attributes: attributes,
+		Apps:       apps,
 	}
 
 	return Developer, nil

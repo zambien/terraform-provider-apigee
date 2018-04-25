@@ -186,12 +186,12 @@ func setDeveloperAppData(d *schema.ResourceData) (apigee.DeveloperApp, error) {
 	}
 
 	DeveloperApp := apigee.DeveloperApp{
-		Name:          	d.Get("name").(string),
-		Attributes:		attributes,
-		ApiProducts:	apiProducts,
-		KeyExpiresIn:	d.Get("key_expires_in").(int),
-		Scopes:			scopes,
-		CallbackUrl:	d.Get("callback_url").(string),
+		Name:         d.Get("name").(string),
+		Attributes:   attributes,
+		ApiProducts:  apiProducts,
+		KeyExpiresIn: d.Get("key_expires_in").(int),
+		Scopes:       scopes,
+		CallbackUrl:  d.Get("callback_url").(string),
 	}
 
 	return DeveloperApp, nil

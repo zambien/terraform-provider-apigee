@@ -157,12 +157,12 @@ func setCompanyData(d *schema.ResourceData) (apigee.Company, error) {
 	}
 
 	Company := apigee.Company{
-		Name:           d.Get("name").(string),
-		DisplayName:	d.Get("display_name").(string),
-		Attributes:		attributes,
+		Name:        d.Get("name").(string),
+		DisplayName: d.Get("display_name").(string),
+		Attributes:  attributes,
 
-		Apps:			apps,
-		Status:		d.Get("status").(string),
+		Apps:   apps,
+		Status: d.Get("status").(string),
 	}
 
 	return Company, nil
