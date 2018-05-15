@@ -8,7 +8,7 @@ build: vendor fmtcheck
 
 GLIDE := $(shell command -v glide 2> /dev/null)
 ifndef GLIDE
-$(error "glide is not available. Install using `curl https://glide.sh/get | sh`")
+$(error "glide is not available. Install using `curl https://glide.sh/get | sh`" or if on Mac `brew install glide`)
 endif
 vendor: glide.yaml ## Install vendor dependencies
 	glide update --no-recursive
