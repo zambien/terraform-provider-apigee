@@ -4,9 +4,7 @@ GOFMT_FILES?=$$(find . -name '*.go' |grep -v vendor)
 default: build
 
 build: vendor fmtcheck
-	@rm -rf build/
-	@mkdir -p build/
-	CGO_ENABLED=0 go build -ldflags '-w -extldflags "-static"' -o build/terraform-provider-apigee
+	CGO_ENABLED=0 go install -ldflags '-w -extldflags "-static"'
 
 GLIDE := $(shell command -v glide 2> /dev/null)
 ifndef GLIDE
