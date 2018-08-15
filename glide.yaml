@@ -5,7 +5,7 @@ import:
   - helper/schema
   - plugin
   - terraform
-- package: github.com/satori/go.uuid
+- package: github.com/gofrs/uuid
 - package: github.com/zambien/go-apigee-edge
 - package: github.com/bgentry/go-netrc/netrc
 - package: github.com/google/go-querystring/query

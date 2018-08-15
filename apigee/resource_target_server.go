@@ -2,8 +2,8 @@ package apigee
 
 import (
 	"fmt"
+	"github.com/gofrs/uuid"
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/satori/go.uuid"
 	"github.com/zambien/go-apigee-edge"
 	"log"
 	"strconv"
