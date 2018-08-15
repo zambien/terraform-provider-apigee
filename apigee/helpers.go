@@ -3,6 +3,8 @@ package apigee
 import (
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/zambien/go-apigee-edge"
+	"reflect"
+	"sort"
 )
 
 func flattenStringList(list []string) []interface{} {
@@ -55,4 +57,19 @@ func attributesFromMap(attributes map[string]interface{}) []apigee.Attribute {
 	}
 
 	return result
+}
+
+func arraySortedEqual(a, b []string) bool {
+	if len(a) != len(b) {return false }
+
+	a_copy := make([]string, len(a))
+	b_copy := make([]string, len(b))
+
+	copy(a_copy, a)
+	copy(b_copy, b)
+
+	sort.Strings(a_copy)
+	sort.Strings(b_copy)
+
+	return reflect.DeepEqual(a_copy, b_copy)
 }

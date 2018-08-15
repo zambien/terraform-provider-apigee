@@ -88,7 +88,7 @@ func testAccCheckTargetServerExists(n string, name string) resource.TestCheckFun
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(*apigee.EdgeClient)
 		if err := targetServerExistsHelper(s, client, name); err != nil {
-			log.Print("Error in testAccCheckTargetServerExists: %s", err)
+			log.Printf("Error in testAccCheckTargetServerExists: %s", err)
 			return err
 		}
 		return nil
@@ -166,7 +166,7 @@ func targetServerExistsHelper(s *terraform.State, client *apigee.EdgeClient, nam
 		if targetServerData, _, err := client.TargetServers.Get(name, "test"); err != nil {
 			return fmt.Errorf("Received an error retrieving target server  %+v\n", targetServerData)
 		} else {
-			log.Print("Created target server name: %s", targetServerData.Name)
+			log.Printf("Created target server name: %s", targetServerData.Name)
 		}
 
 	}

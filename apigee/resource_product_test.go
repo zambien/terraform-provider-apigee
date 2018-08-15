@@ -79,7 +79,7 @@ func testAccCheckProductExists(n string, name string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(*apigee.EdgeClient)
 		if err := productExistsHelper(s, client, name); err != nil {
-			log.Print("Error in testAccCheckProductExists: %s", err)
+			log.Printf("Error in testAccCheckProductExists: %s", err)
 			return err
 		}
 		return nil
@@ -152,7 +152,7 @@ func productExistsHelper(s *terraform.State, client *apigee.EdgeClient, name str
 		if productData, _, err := client.Products.Get(name); err != nil {
 			return fmt.Errorf("Received an error retrieving product  %+v\n", productData)
 		} else {
-			log.Print("Created product name: %s", productData.Name)
+			log.Printf("Created product name: %s", productData.Name)
 		}
 
 	}

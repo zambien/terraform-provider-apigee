@@ -59,7 +59,7 @@ func testAccCheckProxyExists(n string, name string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(*apigee.EdgeClient)
 		if err := proxyExistsHelper(s, client, name); err != nil {
-			log.Print("Error in testAccCheckProxyExists: %s", err)
+			log.Printf("Error in testAccCheckProxyExists: %s", err)
 			return err
 		}
 		return nil
@@ -116,7 +116,7 @@ func proxyExistsHelper(s *terraform.State, client *apigee.EdgeClient, name strin
 		if proxyData, _, err := client.Proxies.Get(name); err != nil {
 			return fmt.Errorf("Received an error retrieving proxy  %+v\n", proxyData)
 		} else {
-			log.Print("Created proxy name: %s", proxyData.Name)
+			log.Printf("Created proxy name: %s", proxyData.Name)
 		}
 
 	}

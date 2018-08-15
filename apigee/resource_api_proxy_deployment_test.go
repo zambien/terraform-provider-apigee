@@ -63,7 +63,7 @@ func testAccCheckProxyDeploymentExists(n string, name string) resource.TestCheck
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(*apigee.EdgeClient)
 		if err := proxyDeploymentExistsHelper(s, client, name); err != nil {
-			log.Print("Error in testAccCheckProxyDeploymentExists: %s", err)
+			log.Printf("Error in testAccCheckProxyDeploymentExists: %s", err)
 			return err
 		}
 		return nil
@@ -124,7 +124,7 @@ func proxyDeploymentExistsHelper(s *terraform.State, client *apigee.EdgeClient, 
 		if proxyDeploymentData, _, err := client.Proxies.GetDeployments(name); err != nil {
 			return fmt.Errorf("Received an error retrieving proxy deployment  %+v\n", proxyDeploymentData)
 		} else {
-			log.Print("Created proxy deployment name: %s", proxyDeploymentData.Name)
+			log.Printf("Created proxy deployment name: %s", proxyDeploymentData.Name)
 		}
 
 	}
