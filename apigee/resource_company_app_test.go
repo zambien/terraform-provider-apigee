@@ -60,7 +60,7 @@ func testAccCheckCompanyAppExists(n string, name string) resource.TestCheckFunc 
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(*apigee.EdgeClient)
 		if err := companyAppExistsHelper(s, client, name); err != nil {
-			log.Print("Error in testAccCheckCompanyAppExists: %s", err)
+			log.Printf("Error in testAccCheckCompanyAppExists: %s", err)
 			return err
 		}
 		return nil
@@ -132,7 +132,7 @@ func companyAppExistsHelper(s *terraform.State, client *apigee.EdgeClient, name 
 		if companyAppData, _, err := client.CompanyApps.Get("foo_company", name); err != nil {
 			return fmt.Errorf("Received an error retrieving company app: %+v\n", err)
 		} else {
-			log.Print("Created company app: %s", companyAppData.Name)
+			log.Printf("Created company app: %s", companyAppData.Name)
 		}
 
 	}

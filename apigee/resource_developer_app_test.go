@@ -38,6 +38,10 @@ func TestAccDeveloperApp_Updated(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"apigee_developer_app.foo_developer_app", "api_products.0", "foo_product"),
 					resource.TestCheckResourceAttr(
+						"apigee_developer_app.foo_developer_app", "api_products.1", "bbb_product"),
+					resource.TestCheckResourceAttr(
+						"apigee_developer_app.foo_developer_app", "api_products.2", "aaa_product"),
+					resource.TestCheckResourceAttr(
 						"apigee_developer_app.foo_developer_app", "scopes.0", "READ"),
 					resource.TestCheckResourceAttr(
 						"apigee_developer_app.foo_developer_app", "callback_url", "https://www.google.com"),
@@ -64,7 +68,7 @@ func testAccCheckDeveloperAppExists(n string, name string) resource.TestCheckFun
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(*apigee.EdgeClient)
 		if err := developerAppExistsHelper(s, client, name); err != nil {
-			log.Print("Error in testAccCheckDeveloperAppExists: %s", err)
+			log.Printf("Error in testAccCheckDeveloperAppExists: %s", err)
 			return err
 		}
 		return nil
@@ -93,16 +97,33 @@ resource "apigee_developer" "foo_developer" {
    user_name = "footest"
 }
 
+resource "apigee_product" "aaa_product" {
+   name = "aaa_product"
+   approval_type = "auto"
+   scopes = ["READ"]
+}
+
+resource "apigee_product" "bbb_product" {
+   name = "bbb_product"
+   approval_type = "auto"
+   scopes = ["READ"]
+}
+
 resource "apigee_product" "foo_product" {
    name = "foo_product"
    approval_type = "auto"
    scopes = ["READ"]
 }
 
+
 resource "apigee_developer_app" "foo_developer_app" {
    name = "foo_developer_app_name_updated"
    developer_email = "${apigee_developer.foo_developer.email}"
-   api_products = ["${apigee_product.foo_product.name}"]
+   api_products = [
+		"${apigee_product.foo_product.name}",		
+		"${apigee_product.bbb_product.name}",		
+		"${apigee_product.aaa_product.name}"
+   ]
    scopes = ["READ"]
    callback_url = "https://www.google.com"
    key_expires_in = 123121515135
@@ -143,7 +164,7 @@ func developerAppExistsHelper(s *terraform.State, client *apigee.EdgeClient, nam
 		if developerAppData, _, err := client.DeveloperApps.Get("foo_developer_app_test_email@test.com", name); err != nil {
 			return fmt.Errorf("Received an error retrieving developer app: %+v\n", err)
 		} else {
-			log.Print("Created developer app: %s", developerAppData.Name)
+			log.Printf("Created developer app: %s", developerAppData.Name)
 		}
 
 	}

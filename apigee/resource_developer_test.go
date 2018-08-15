@@ -69,7 +69,7 @@ func testAccCheckDeveloperExists(n string, email string) resource.TestCheckFunc 
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(*apigee.EdgeClient)
 		if err := developerExistsHelper(s, client, email); err != nil {
-			log.Print("Error in testAccCheckDeveloperExists: %s", err)
+			log.Printf("Error in testAccCheckDeveloperExists: %s", err)
 			return err
 		}
 		return nil
@@ -133,7 +133,7 @@ func developerExistsHelper(s *terraform.State, client *apigee.EdgeClient, email 
 		if developerData, _, err := client.Developers.Get(email); err != nil {
 			return fmt.Errorf("Received an error retrieving developer  %+v\n", developerData)
 		} else {
-			log.Print("Created developer Email: %s", developerData.Email)
+			log.Printf("Created developer Email: %s", developerData.Email)
 		}
 
 	}

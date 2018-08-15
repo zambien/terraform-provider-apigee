@@ -106,11 +106,19 @@ func resourceCompanyAppRead(d *schema.ResourceData, meta interface{}) error {
 	//Scopes and apiProducts are tricky.  These actually result in an array which will always have
 	//one element unless an outside API is called.  Since using terraform we assume you do everything there
 	//you might only ever have one credential... we'll see.
-	apiProducts := apiProductsListFromCredentials(CompanyAppData.Credentials[0].ApiProducts)
 	scopes := flattenStringList(CompanyAppData.Credentials[0].Scopes)
 
+	//Apigee does not return products in the order you send them
+	oldApiProducts := getStringList("api_products", d)
+	newApiProducts := apiProductsListFromCredentials(CompanyAppData.Credentials[0].ApiProducts)
+
+	if !arraySortedEqual(oldApiProducts, newApiProducts) {
+		d.Set("api_products", newApiProducts)
+	} else {
+		d.Set("api_products", oldApiProducts)
+	}
+
 	d.Set("name", CompanyAppData.Name)
-	d.Set("api_products", apiProducts)
 	d.Set("attributes", CompanyAppData.Attributes)
 	d.Set("scopes", scopes)
 	d.Set("callback_url", CompanyAppData.CallbackUrl)
