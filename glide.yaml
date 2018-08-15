@@ -9,3 +9,4 @@ import:
 - package: github.com/zambien/go-apigee-edge
 - package: github.com/bgentry/go-netrc/netrc
 - package: github.com/google/go-querystring/query
+- package: github.com/sethgrid/pester
