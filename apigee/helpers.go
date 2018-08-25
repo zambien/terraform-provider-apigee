@@ -60,7 +60,9 @@ func attributesFromMap(attributes map[string]interface{}) []apigee.Attribute {
 }
 
 func arraySortedEqual(a, b []string) bool {
-	if len(a) != len(b) {return false }
+	if len(a) != len(b) {
+		return false
+	}
 
 	a_copy := make([]string, len(a))
 	b_copy := make([]string, len(b))
