@@ -59,6 +59,8 @@ func TestAccProduct_Updated(t *testing.T) {
 						"apigee_product.foo_product", "attributes.custom1", "customval1"),
 					resource.TestCheckResourceAttr(
 						"apigee_product.foo_product", "attributes.custom2", "customval2"),
+					resource.TestCheckResourceAttr(
+						"apigee_product.foo_product", "environments.0", "test"),
 				),
 			},
 		},
@@ -115,6 +117,7 @@ resource "apigee_product" "foo_product" {
       custom1 = "customval1"
       custom2 = "customval2"
    }
+   environments = ["test"]
 }
 `
 
