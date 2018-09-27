@@ -66,6 +66,11 @@ func resourceProduct() *schema.Resource {
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+			"environments": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
 		},
 	}
 }
@@ -115,6 +120,7 @@ func resourceProductRead(d *schema.ResourceData, meta interface{}) error {
 	apiResources := flattenStringList(ProductData.ApiResources)
 	proxies := flattenStringList(ProductData.Proxies)
 	scopes := flattenStringList(ProductData.Scopes)
+	environments := flattenStringList(ProductData.Environments)
 
 	d.Set("name", ProductData.Name)
 
@@ -132,6 +138,7 @@ func resourceProductRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("quota", ProductData.Quota)
 	d.Set("quota_interval", ProductData.QuotaInterval)
 	d.Set("quota_time_unit", ProductData.QuotaTimeUnit)
+	d.Set("environments", environments)
 	d.Set("scopes", scopes)
 
 	return nil
@@ -201,6 +208,11 @@ func setProductData(d *schema.ResourceData) (apigee.Product, error) {
 		attributes = attributesFromMap(d.Get("attributes").(map[string]interface{}))
 	}
 
+	environments := []string{""}
+	if d.Get("environments") != nil {
+		environments = getStringList("environments", d)
+	}
+
 	Product := apigee.Product{
 		Name:          d.Get("name").(string),
 		DisplayName:   d.Get("display_name").(string),
@@ -213,6 +225,7 @@ func setProductData(d *schema.ResourceData) (apigee.Product, error) {
 		QuotaInterval: d.Get("quota_interval").(string),
 		QuotaTimeUnit: d.Get("quota_time_unit").(string),
 		Scopes:        scopes,
+		Environments:  environments,
 	}
 
 	return Product, nil

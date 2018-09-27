@@ -90,6 +90,8 @@ resource "apigee_product" "helloworld_product" {
       custom1 = "customval1"
       custom2 = "customval2"
    }
+   
+   environments = ["test"] # Optional.  If none are specified all are allowed per Apigee API.
 }
 
 # A proxy deployment
