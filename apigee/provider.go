@@ -16,15 +16,21 @@ func Provider() terraform.ResourceProvider {
 				DefaultFunc: schema.EnvDefaultFunc("APIGEE_BASE_URI", nil),
 				Description: "Apigee Edge Base URI",
 			},
+			"access_token": &schema.Schema{
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("APIGEE_ACCESS_TOKEN", nil),
+				Description: "Apigee Access Token",
+			},
 			"user": &schema.Schema{
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("APIGEE_USER", nil),
 				Description: "Apigee User",
 			},
 			"password": &schema.Schema{
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("APIGEE_PASSWORD", nil),
 				Description: "Apigee User Password",
 			},
@@ -52,12 +58,11 @@ func Provider() terraform.ResourceProvider {
 }
 
 func configureProvider(d *schema.ResourceData) (interface{}, error) {
-
 	auth := apigee.EdgeAuth{
-		Username: d.Get("user").(string),
-		Password: d.Get("password").(string),
+		Username:    d.Get("user").(string),
+		Password:    d.Get("password").(string),
+		AccessToken: d.Get("access_token").(string),
 	}
-
 	opts := &apigee.EdgeClientOptions{
 		MgmtUrl: d.Get("base_uri").(string),
 		Org:     d.Get("org").(string),
@@ -68,6 +73,5 @@ func configureProvider(d *schema.ResourceData) (interface{}, error) {
 	if err != nil {
 		return client, err
 	}
-
 	return client, nil
 }
