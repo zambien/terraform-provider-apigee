@@ -36,6 +36,7 @@ APIGEE_BASE_URI="https://someinternalapigee.yourdomain.suffix" # optional... def
 APIGEE_ORG="my-really-cool-apigee-org-name"
 APIGEE_USER="some_dude@domain.suffix"
 APIGEE_PASSWORD="for_the_love_of_pete_please_use_a_strong_password"
+APIGEE_ACCESS_TOKEN="my-access-token"
 ```
 
 ## Simple Example
