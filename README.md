@@ -34,8 +34,13 @@ EOF
 ```
 APIGEE_BASE_URI="https://someinternalapigee.yourdomain.suffix" # optional... defaults to Apigee's SaaS
 APIGEE_ORG="my-really-cool-apigee-org-name"
+
+# To authenticate with Apigee you can use user and password
 APIGEE_USER="some_dude@domain.suffix"
 APIGEE_PASSWORD="for_the_love_of_pete_please_use_a_strong_password"
+
+# Or you can use an Access Token from Apigee OAuth
+APIGEE_ACCESS_TOKEN="my-access-token"
 ```
 
 ## Simple Example
@@ -190,13 +195,19 @@ Linux:
 `GOOS=linux GOARCH=amd64 go build -o terraform-provider-apigee-v0.0.X-linux64`
 
 ## Testing
-To run tests, use the following commands.  Note that you will need your credentials setup for the tests to run.
+To run tests, use the following commands.  Note that you will need your credentials setup for the tests to run. You can authenticate with your username/password OR an access token from Apigee OAuth.
 
-Set env vars for test:
+#### Set env vars for test using username/password:
 ```
 APIGEE_ORG="my-really-cool-apigee-org-name"
 APIGEE_USER="some_dude@domain.suffix"
 APIGEE_PASSWORD="for_the_love_of_pete_please_use_a_strong_password"
+```
+
+#### Set env vars for test using access token:
+```
+APIGEE_ORG="my-really-cool-apigee-org-name"
+APIGEE_ACCESS_TOKEN="my-access-token"
 ```
 
 From the project root:
