@@ -4,11 +4,12 @@ import (
 	"strings"
 
 	"fmt"
+	"log"
+	"strconv"
+
 	"github.com/gofrs/uuid"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/zambien/go-apigee-edge"
-	"log"
-	"strconv"
 )
 
 func resourceApiProxy() *schema.Resource {
@@ -17,6 +18,9 @@ func resourceApiProxy() *schema.Resource {
 		Read:   resourceApiProxyRead,
 		Update: resourceApiProxyUpdate,
 		Delete: resourceApiProxyDelete,
+		Importer: &schema.ResourceImporter{
+			State: resourceApiProxyImport,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -46,7 +50,6 @@ func resourceApiProxy() *schema.Resource {
 }
 
 func resourceApiProxyCreate(d *schema.ResourceData, meta interface{}) error {
-
 	log.Print("[DEBUG] resourceApiProxyCreate START")
 
 	client := meta.(*apigee.EdgeClient)
@@ -68,8 +71,21 @@ func resourceApiProxyCreate(d *schema.ResourceData, meta interface{}) error {
 	return resourceApiProxyRead(d, meta)
 }
 
-func resourceApiProxyRead(d *schema.ResourceData, meta interface{}) error {
+func resourceApiProxyImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	log.Print("[DEBUG] resourceApiProxyImport START")
 
+	client := meta.(*apigee.EdgeClient)
+	proxy, _, err := client.Proxies.Get(d.Id())
+	if err != nil {
+		return []*schema.ResourceData{}, fmt.Errorf("[DEBUG] resourceApiProxyImport. Error getting deployment api: %v", err)
+	}
+	latestRev := strconv.Itoa(len(proxy.Revisions))
+	d.Set("revision", latestRev)
+	d.Set("name", d.Id())
+	return []*schema.ResourceData{d}, nil
+}
+
+func resourceApiProxyRead(d *schema.ResourceData, meta interface{}) error {
 	log.Print("[DEBUG] resourceApiProxyRead START")
 
 	client := meta.(*apigee.EdgeClient)
