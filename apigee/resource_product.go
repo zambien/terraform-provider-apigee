@@ -47,19 +47,14 @@ func resourceProduct() *schema.Resource {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Schema{
-					Type:     schema.TypeString,
-					Required: true,
+					Type: schema.TypeString,
 				},
 			},
 			"proxies": {
 				Type:     schema.TypeList,
 				Optional: true,
-				MaxItems: 100,
-				Computed: true,
-				ForceNew: true,
 				Elem: &schema.Schema{
-					Type:     schema.TypeString,
-					Required: true,
+					Type: schema.TypeString,
 				},
 			},
 			"quota": {
