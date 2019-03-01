@@ -2,11 +2,12 @@ package apigee
 
 import (
 	"fmt"
+	"log"
+	"strings"
+
 	"github.com/gofrs/uuid"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/zambien/go-apigee-edge"
-	"log"
-	"strings"
 )
 
 func resourceProduct() *schema.Resource {
@@ -15,6 +16,9 @@ func resourceProduct() *schema.Resource {
 		Read:   resourceProductRead,
 		Update: resourceProductUpdate,
 		Delete: resourceProductDelete,
+		Importer: &schema.ResourceImporter{
+			State: resourceProductImport,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -42,12 +46,16 @@ func resourceProduct() *schema.Resource {
 			"api_resources": {
 				Type:     schema.TypeList,
 				Optional: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
 			},
 			"proxies": {
 				Type:     schema.TypeList,
 				Optional: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
 			},
 			"quota": {
 				Type:     schema.TypeString,
@@ -97,6 +105,39 @@ func resourceProductCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	return resourceProductRead(d, meta)
+}
+
+func resourceProductImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	log.Print("[DEBUG] resourceProductImport START")
+
+	client := meta.(*apigee.EdgeClient)
+	productData, _, err := client.Products.Get(d.Id())
+	if err != nil {
+		return []*schema.ResourceData{}, fmt.Errorf("[DEBUG] resourceProductImport. Error getting product: %v", err)
+	}
+	d.Set("name", d.Id())
+	apiResources := flattenStringList(productData.ApiResources)
+	proxies := flattenStringList(productData.Proxies)
+	scopes := flattenStringList(productData.Scopes)
+	environments := flattenStringList(productData.Environments)
+	if productData.DisplayName == "" {
+		d.Set("display_name", productData.Name)
+	} else {
+		d.Set("display_name", productData.DisplayName)
+	}
+	d.Set("display_name", productData.DisplayName)
+	d.Set("description", productData.Description)
+	d.Set("approval_type", productData.ApprovalType)
+	d.Set("attributes", productData.Attributes)
+	d.Set("apiResource", apiResources)
+	d.Set("proxies", proxies)
+	d.Set("quota", productData.Quota)
+	d.Set("quota_interval", productData.QuotaInterval)
+	d.Set("quota_time_unit", productData.QuotaTimeUnit)
+	d.Set("environments", environments)
+	d.Set("scopes", scopes)
+
+	return []*schema.ResourceData{d}, nil
 }
 
 func resourceProductRead(d *schema.ResourceData, meta interface{}) error {

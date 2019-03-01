@@ -2,12 +2,13 @@ package apigee
 
 import (
 	"fmt"
-	"github.com/gofrs/uuid"
-	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/zambien/go-apigee-edge"
 	"log"
 	"strconv"
 	"strings"
+
+	"github.com/gofrs/uuid"
+	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/zambien/go-apigee-edge"
 )
 
 func resourceApiProxyDeployment() *schema.Resource {
@@ -16,6 +17,9 @@ func resourceApiProxyDeployment() *schema.Resource {
 		Read:   resourceApiProxyDeploymentRead,
 		Update: resourceApiProxyDeploymentUpdate,
 		Delete: resourceApiProxyDeploymentDelete,
+		Importer: &schema.ResourceImporter{
+			State: resourceApiProxyDeploymentImport,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"proxy_name": {
@@ -49,6 +53,35 @@ func resourceApiProxyDeployment() *schema.Resource {
 			},
 		},
 	}
+}
+
+func resourceApiProxyDeploymentImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	log.Print("[DEBUG] resourceApiProxyDeploymentImport START")
+	client := meta.(*apigee.EdgeClient)
+
+	if len(strings.Split(d.Id(), "_")) != 3 {
+		return []*schema.ResourceData{}, fmt.Errorf("[ERR] Wrong format of resource: %s. Please follow '{name}_{env}_deployment'", d.Id())
+	}
+	name := strings.Split(d.Id(), "_")[0]
+	IDEnv := strings.Split(d.Id(), "_")[1]
+	deployment, _, err := client.Proxies.GetDeployments(name)
+	if err != nil {
+		log.Printf("[DEBUG] resourceApiProxyDeploymentImport. Error getting deployment api: %v", err)
+		return nil, nil
+	}
+	d.Set("org", deployment.Organization)
+	d.Set("proxy_name", deployment.Name)
+	for _, env := range deployment.Environments {
+		if strings.ToLower(env.Name) != strings.ToLower(IDEnv) {
+			continue
+		}
+		latestRev := env.Revision[len(env.Revision)-1]
+		d.Set("env", env.Name)
+		d.Set("revision", latestRev.Number.String())
+		break
+	}
+
+	return []*schema.ResourceData{d}, nil
 }
 
 func resourceApiProxyDeploymentRead(d *schema.ResourceData, meta interface{}) (e error) {
