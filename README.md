@@ -219,7 +219,19 @@ To run a single test:
 Running in debug mode and capturing debug in a file:
 `rm -f /tmp/testlog.txt && TF_ACC=1 TF_LOG=DEBUG TF_LOG_PATH=/tmp/testlog.txt go test -v ./apigee`
 
+## Releasing
 
+We use goreleaser to release versions.  The steps to release are:
+
+```
+export GITHUB_TOKEN="A_GITHUB_TOKEN_THAT_HAS_CORRECT_ACCESS_ENTITLEMENTS"
+git tag -a v0.0.x -m "Some description of the release"
+goreleaser # actually create the release
+```
+
+You can read more about goreleaser here:
+
+https://goreleaser.com/
 
 ## Important Known Issues
 
