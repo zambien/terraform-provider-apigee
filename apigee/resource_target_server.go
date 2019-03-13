@@ -129,7 +129,7 @@ func resourceTargetServerImport(d *schema.ResourceData, meta interface{}) ([]*sc
 	if err != nil {
 		log.Printf("[ERROR] resourceTargetServerImport error getting target servers: %s", err.Error())
 		if strings.Contains(err.Error(), "404 ") {
-			return []*schema.ResourceData{}, fmt.Errorf("[Error] resourceTargetServerImport 404 encountered.  Removing state for target server: %#v", d.Get("name").(string))
+			return []*schema.ResourceData{}, fmt.Errorf("[Error] resourceTargetServerImport 404 encountered.  Removing state for target server: %#v", name)
 		}
 		return []*schema.ResourceData{}, fmt.Errorf("[ERROR] resourceTargetServerImport error getting target servers: %s", err.Error())
 	}
