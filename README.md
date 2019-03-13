@@ -108,10 +108,11 @@ resource "apigee_api_proxy_deployment" "helloworld_proxy_deployment" {
 }
 
 # A target server
-resource "apigee_target_server" "helloworld_target_server" {
+# NOTE: If you want to use the import functionality the resource ID must follow {target_server_name}_{environment}
+resource "apigee_target_server" "helloworld_target_server_testing" {
    name = "helloworld_target_server"
    host = "somehost.thatexists.com"
-   env = "${var.env}"
+   env = "testing"
    enabled = true
    port = 8080
 

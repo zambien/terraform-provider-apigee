@@ -2,12 +2,13 @@ package apigee
 
 import (
 	"fmt"
-	"github.com/gofrs/uuid"
-	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/zambien/go-apigee-edge"
 	"log"
 	"strconv"
 	"strings"
+
+	"github.com/gofrs/uuid"
+	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/zambien/go-apigee-edge"
 )
 
 func resourceTargetServer() *schema.Resource {
@@ -16,6 +17,9 @@ func resourceTargetServer() *schema.Resource {
 		Read:   resourceTargetServerRead,
 		Update: resourceTargetServerUpdate,
 		Delete: resourceTargetServerDelete,
+		Importer: &schema.ResourceImporter{
+			State: resourceTargetServerImport,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -110,6 +114,45 @@ func resourceTargetServerCreate(d *schema.ResourceData, meta interface{}) error 
 	}
 
 	return resourceTargetServerRead(d, meta)
+}
+
+func resourceTargetServerImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+
+	log.Print("[DEBUG] resourceTargetServerImport START")
+	client := meta.(*apigee.EdgeClient)
+	if len(strings.Split(d.Id(), "_")) != 2 {
+		return []*schema.ResourceData{}, fmt.Errorf("[ERR] Wrong format of resource: %s. Please follow '{name}_{env}'", d.Id())
+	}
+	name := strings.Split(d.Id(), "_")[0]
+	IDEnv := strings.Split(d.Id(), "_")[1]
+	targetServerData, _, err := client.TargetServers.Get(name, IDEnv)
+	if err != nil {
+		log.Printf("[ERROR] resourceTargetServerImport error getting target servers: %s", err.Error())
+		if strings.Contains(err.Error(), "404 ") {
+			return []*schema.ResourceData{}, fmt.Errorf("[Error] resourceTargetServerImport 404 encountered.  Removing state for target server: %#v", name)
+		}
+		return []*schema.ResourceData{}, fmt.Errorf("[ERROR] resourceTargetServerImport error getting target servers: %s", err.Error())
+	}
+
+	d.Set("name", targetServerData.Name)
+	d.Set("host", targetServerData.Host)
+	d.Set("enabled", targetServerData.Enabled)
+	d.Set("port", targetServerData.Port)
+	d.Set("env", IDEnv)
+
+	protocols := flattenStringList(targetServerData.SSLInfo.Protocols)
+	ciphers := flattenStringList(targetServerData.SSLInfo.Ciphers)
+
+	d.Set("ssl_info.0.ssl_enabled", targetServerData.SSLInfo.SSLEnabled)
+	d.Set("ssl_info.0.client_auth_enabled", targetServerData.SSLInfo.ClientAuthEnabled)
+	d.Set("ssl_info.0.key_store", targetServerData.SSLInfo.KeyStore)
+	d.Set("ssl_info.0.trust_store", targetServerData.SSLInfo.TrustStore)
+	d.Set("ssl_info.0.key_alias", targetServerData.SSLInfo.KeyAlias)
+	d.Set("ssl_info.0.ciphers", ciphers)
+	d.Set("ssl_info.0.ignore_validation_errors", targetServerData.SSLInfo.IgnoreValidationErrors)
+	d.Set("ssl_info.0.protocols", protocols)
+
+	return []*schema.ResourceData{d}, nil
 }
 
 func resourceTargetServerRead(d *schema.ResourceData, meta interface{}) error {
