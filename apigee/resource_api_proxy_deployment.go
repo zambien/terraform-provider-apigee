@@ -132,6 +132,20 @@ func resourceApiProxyDeploymentCreate(d *schema.ResourceData, meta interface{}) 
 	delay := int(d.Get("delay").(int))
 	override := bool(d.Get("override").(bool))
 
+	if d.Get("revision").(string) == "latest" {
+		// deploy latest
+		rev, err := getLatestRevision(client, proxy_name)
+		if err != nil {
+			return fmt.Errorf("[ERROR] resourceApiProxyDeploymentUpdate error getting latest revision: %v", err)
+		}
+		_, _, err = client.Proxies.Deploy(proxy_name, env, apigee.Revision(rev), delay, override)
+		if err != nil {
+			return fmt.Errorf("[ERROR] resourceApiProxyDeploymentUpdate error deploying: %v", err)
+		}
+		log.Printf("[DEBUG] resourceApiProxyDeploymentUpdate Deployed revision %d of %s", rev, proxy_name)
+		return resourceApiProxyDeploymentRead(d, meta)
+	}
+
 	proxyDep, _, err := client.Proxies.Deploy(proxy_name, env, rev, delay, override)
 
 	if err != nil {
