@@ -104,6 +104,9 @@ resource "apigee_api_proxy_deployment" "helloworld_proxy_deployment" {
    proxy_name   = "${apigee_api_proxy.helloworld_proxy.name}"
    org          = "${var.org}"
    env          = "${var.env}"
+
+   # NOTE: revision = "latest" 
+   # will deploy the latest revision of the api proxy 
    revision     = "${apigee_api_proxy.helloworld_proxy.revision}"
 }
 

@@ -71,21 +71,12 @@ func resourceApiProxyDeploymentImport(d *schema.ResourceData, meta interface{}) 
 	}
 	d.Set("org", deployment.Organization)
 	d.Set("proxy_name", deployment.Name)
-	for _, env := range deployment.Environments {
-		if strings.ToLower(env.Name) != strings.ToLower(IDEnv) {
-			continue
-		}
-		latestRev := env.Revision[len(env.Revision)-1]
-		d.Set("env", env.Name)
-		d.Set("revision", latestRev.Number.String())
-		break
-	}
+	d.Set("env", IDEnv)
 
 	return []*schema.ResourceData{d}, nil
 }
 
 func resourceApiProxyDeploymentRead(d *schema.ResourceData, meta interface{}) (e error) {
-
 	log.Print("[DEBUG] resourceApiProxyDeploymentRead START")
 	log.Printf("[DEBUG] resourceApiProxyDeploymentRead proxy_name: %#v", d.Get("proxy_name").(string))
 
@@ -104,9 +95,7 @@ func resourceApiProxyDeploymentRead(d *schema.ResourceData, meta interface{}) (e
 			return fmt.Errorf("[ERROR] resourceApiProxyDeploymentRead error reading deployments: %s", err.Error())
 		}
 	} else {
-
 		log.Printf("[DEBUG] resourceApiProxyDeploymentRead deployments call fired for proxy_name: %#v", d.Get("proxy_name").(string))
-
 		for _, environment := range deployments.Environments {
 			log.Printf("[DEBUG] resourceApiProxyDeploymentRead checking revisions in deployed environment: %#v for expected environment: %#v\n", environment.Name, d.Get("env").(string))
 			if environment.Name == d.Get("env").(string) {
@@ -143,6 +132,20 @@ func resourceApiProxyDeploymentCreate(d *schema.ResourceData, meta interface{}) 
 	delay := int(d.Get("delay").(int))
 	override := bool(d.Get("override").(bool))
 
+	if d.Get("revision").(string) == "latest" {
+		// deploy latest
+		rev, err := getLatestRevision(client, proxy_name)
+		if err != nil {
+			return fmt.Errorf("[ERROR] resourceApiProxyDeploymentUpdate error getting latest revision: %v", err)
+		}
+		_, _, err = client.Proxies.Deploy(proxy_name, env, apigee.Revision(rev), delay, override)
+		if err != nil {
+			return fmt.Errorf("[ERROR] resourceApiProxyDeploymentUpdate error deploying: %v", err)
+		}
+		log.Printf("[DEBUG] resourceApiProxyDeploymentUpdate Deployed revision %d of %s", rev, proxy_name)
+		return resourceApiProxyDeploymentRead(d, meta)
+	}
+
 	proxyDep, _, err := client.Proxies.Deploy(proxy_name, env, rev, delay, override)
 
 	if err != nil {
@@ -173,8 +176,6 @@ func resourceApiProxyDeploymentUpdate(d *schema.ResourceData, meta interface{}) 
 
 	proxy_name := d.Get("proxy_name").(string)
 	env := d.Get("env").(string)
-	rev_int, _ := strconv.Atoi(d.Get("revision").(string))
-	rev := apigee.Revision(rev_int)
 	delay := int(d.Get("delay").(int))
 	override := bool(d.Get("override").(bool))
 
@@ -186,6 +187,22 @@ func resourceApiProxyDeploymentUpdate(d *schema.ResourceData, meta interface{}) 
 		override = true
 	}
 
+	if d.Get("revision").(string) == "latest" {
+		// deploy latest
+		rev, err := getLatestRevision(client, proxy_name)
+		if err != nil {
+			return fmt.Errorf("[ERROR] resourceApiProxyDeploymentUpdate error getting latest revision: %v", err)
+		}
+		_, _, err = client.Proxies.ReDeploy(proxy_name, env, apigee.Revision(rev), delay, override)
+		if err != nil {
+			return fmt.Errorf("[ERROR] resourceApiProxyDeploymentUpdate error deploying: %v", err)
+		}
+		log.Printf("[DEBUG] resourceApiProxyDeploymentUpdate Deployed revision %d of %s", rev, proxy_name)
+		return resourceApiProxyDeploymentRead(d, meta)
+	}
+
+	rev_int, _ := strconv.Atoi(d.Get("revision").(string))
+	rev := apigee.Revision(rev_int)
 	_, _, err := client.Proxies.ReDeploy(proxy_name, env, rev, delay, override)
 
 	if err != nil {
@@ -217,4 +234,12 @@ func resourceApiProxyDeploymentDelete(d *schema.ResourceData, meta interface{}) 
 	}
 
 	return nil
+}
+
+func getLatestRevision(client *apigee.EdgeClient, proxyName string) (int, error) {
+	proxy, _, err := client.Proxies.Get(proxyName)
+	if err != nil {
+		return -1, fmt.Errorf("[ERROR] resourceApiProxyRead error reading proxies: %s", err.Error())
+	}
+	return len(proxy.Revisions), nil
 }
