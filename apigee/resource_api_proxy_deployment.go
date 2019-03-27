@@ -59,11 +59,14 @@ func resourceApiProxyDeploymentImport(d *schema.ResourceData, meta interface{}) 
 	log.Print("[DEBUG] resourceApiProxyDeploymentImport START")
 	client := meta.(*apigee.EdgeClient)
 
-	if len(strings.Split(d.Id(), "_")) != 3 {
+	splits := strings.Split(d.Id(), "_")
+	if len(splits) < 2 {
 		return []*schema.ResourceData{}, fmt.Errorf("[ERR] Wrong format of resource: %s. Please follow '{name}_{env}_deployment'", d.Id())
 	}
-	name := strings.Split(d.Id(), "_")[0]
-	IDEnv := strings.Split(d.Id(), "_")[1]
+	nameOffset := len(splits[len(splits)-1]) + len(splits[len(splits)-2])
+	envOffset := len(splits[len(splits)-1])
+	name := d.Id()[:(len(d.Id())-nameOffset)-2]
+	IDEnv := d.Id()[len(name)+1 : (len(d.Id())-envOffset)-1]
 	deployment, _, err := client.Proxies.GetDeployments(name)
 	if err != nil {
 		log.Printf("[DEBUG] resourceApiProxyDeploymentImport. Error getting deployment api: %v", err)
