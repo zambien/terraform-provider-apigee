@@ -120,11 +120,15 @@ func resourceTargetServerImport(d *schema.ResourceData, meta interface{}) ([]*sc
 
 	log.Print("[DEBUG] resourceTargetServerImport START")
 	client := meta.(*apigee.EdgeClient)
-	if len(strings.Split(d.Id(), "_")) != 2 {
+	splits := strings.Split(d.Id(), "_")
+	if len(splits) < 1 {
 		return []*schema.ResourceData{}, fmt.Errorf("[ERR] Wrong format of resource: %s. Please follow '{name}_{env}'", d.Id())
 	}
-	name := strings.Split(d.Id(), "_")[0]
-	IDEnv := strings.Split(d.Id(), "_")[1]
+
+	nameOffset := len(splits[len(splits)-1])
+	name := d.Id()[:(len(d.Id())-nameOffset)-1]
+	IDEnv := splits[len(splits)-1]
+
 	targetServerData, _, err := client.TargetServers.Get(name, IDEnv)
 	if err != nil {
 		log.Printf("[ERROR] resourceTargetServerImport error getting target servers: %s", err.Error())
