@@ -115,7 +115,7 @@ func resourceSharedFlowRead(d *schema.ResourceData, meta interface{}) error {
 
 	client := meta.(*apigee.EdgeClient)
 
-	u, _, err := client.Proxies.Get(d.Get("name").(string))
+	u, _, err := client.SharedFlows.Get(d.Get("name").(string))
 	if err != nil {
 		log.Printf("[ERROR] resourceSharedFlowRead error reading shared flows: %s", err.Error())
 		if strings.Contains(err.Error(), "404 ") {
