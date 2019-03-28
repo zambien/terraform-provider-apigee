@@ -70,13 +70,6 @@ func testAccCheckSharedFlowDeploymentExists(n string, name string) resource.Test
 	}
 }
 
-/*resource "apigee_shared_flow_deployment" "verifyKayla_staging_deployment" {
-  shared_flow_name   = "verifyKayla"
-  org          = "${var.org}"
-  env          = "staging"
-  revision     = "latest"
-}*/
-
 const testAccCheckSharedFlowDeploymentConfigRequired = `
 resource "apigee_shared_flow_deployment" "helloFlow_deployment" {
    shared_flow_name   = "helloFlow"
