@@ -1,7 +1,6 @@
 package: github.com/zambien/terraform-provider-apigee
 import:
 - package: github.com/hashicorp/terraform
-  version: ^0.11.13
   subpackages:
   - helper/schema
   - plugin
