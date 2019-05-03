@@ -176,10 +176,12 @@ func resourceTargetServerRead(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
+	port_str := strconv.Itoa(targetServerData.Port)
+
 	d.Set("name", targetServerData.Name)
 	d.Set("host", targetServerData.Host)
 	d.Set("enabled", targetServerData.Enabled)
-	d.Set("port", targetServerData.Port)
+	d.Set("port", port_str)
 
 	protocols := flattenStringList(targetServerData.SSLInfo.Protocols)
 	ciphers := flattenStringList(targetServerData.SSLInfo.Ciphers)
