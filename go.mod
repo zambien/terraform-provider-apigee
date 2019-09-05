@@ -8,3 +8,5 @@ require (
 	github.com/sethgrid/pester v0.0.0-20190127155807-68a33a018ad0 // indirect
 	github.com/zambien/go-apigee-edge v0.0.0-20190402181302-7d41f53971c1
 )
+
+replace git.apache.org/thrift.git => github.com/apache/thrift v0.0.0-20180902110319-2566ecd5d999
