@@ -71,7 +71,7 @@ const testAccCheckCompanyConfigUpdated = `
 resource "apigee_company" "foo_company" {
    name = "foo_company_updated"
    display_name = "some longer foo description for foo company"
-   attributes {
+   attributes = {
       DisplayName = "my-awesome-foo-company"
    }
 }

@@ -89,7 +89,7 @@ resource "apigee_product" "helloworld_product" {
    # See here: http://docs.apigee.com/api-services/content/working-scopes
    scopes = ["READ"]
 
-   attributes {
+   attributes = {
       access = "public" # this one is needed to expose the proxy.  The rest of the attributes are custom attrs.  Weird.
 
       custom1 = "customval1"
@@ -139,7 +139,7 @@ resource "apigee_developer" "helloworld_developer" {
    last_name = "thelloworld1"                                           # required
    user_name = "helloworld1"                                            # required
 
-   attributes {                                                         # optional
+   attributes = {                                                         # optional
       DisplayName = "my_awesome_app_updated"
       Notes = "notes_for_developer_app_updated"
 	  custom_attribute_name = "custom_attribute_value"
@@ -156,7 +156,7 @@ resource "apigee_developer_app" "helloworld_developer_app" {
    callback_url = "https://www.google.com"                              # optional
    key_expires_in = 2592000000                                          # optional
 
-   attributes {                                                         # optional
+   attributes = {                                                         # optional
       DisplayName = "my_awesome_developer_app"
       Notes = "notes_for_awesome_developer_app"
 	  custom_attribute_name = "custom_attribute_value"
@@ -168,7 +168,7 @@ resource "apigee_company" "helloworld_company" {
    name = "helloworld_company"                                          # required
    display_name = "some longer description for company"                 # optional
 
-   attributes {                                                         # optional
+   attributes = {                                                         # optional
       DisplayName = "my-awesome-company"
    }
 }
