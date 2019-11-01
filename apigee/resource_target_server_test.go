@@ -23,7 +23,7 @@ func TestAccTargetServer_Updated(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"apigee_target_server.foo", "name", "foo_target_server"),
 					resource.TestCheckResourceAttr(
-						"apigee_target_server.foo", "host", "http://some.api.com"),
+						"apigee_target_server.foo", "host", "http://google.com"),
 					resource.TestCheckResourceAttr(
 						"apigee_target_server.foo", "env", "test"),
 					resource.TestCheckResourceAttr(
@@ -87,7 +87,7 @@ func TestAccTargetServer_CreateWithoutSSLInfo(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"apigee_target_server.foo", "name", "foo_target_server"),
 					resource.TestCheckResourceAttr(
-						"apigee_target_server.foo", "host", "https://some.api.com"),
+						"apigee_target_server.foo", "host", "http://google.com"),
 					resource.TestCheckResourceAttr(
 						"apigee_target_server.foo", "env", "test"),
 					resource.TestCheckResourceAttr(
@@ -126,7 +126,7 @@ func testAccCheckTargetServerExists(n string, name string) resource.TestCheckFun
 const testAccCheckTargetServerConfigRequired = `
 resource "apigee_target_server" "foo" {
   name = "foo_target_server"
-  host = "http://some.api.com"
+  host = "http://google.com"
   env = "test"
   enabled = true
   port = 80
@@ -163,7 +163,7 @@ resource "apigee_target_server" "foo" {
 const testAccCheckTargetServerConfigWithoutSSLInfo = `
 resource "apigee_target_server" "foo" {
   name = "foo_target_server"
-  host = "https://some.api.com"
+  host = "http://google.com"
   env = "test"
   enabled = true
   port = 80

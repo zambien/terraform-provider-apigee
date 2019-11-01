@@ -91,7 +91,7 @@ resource "apigee_developer" "foo_developer" {
    first_name = "foo-updated"
    last_name = "test-updated"
    user_name = "footest-updated"
-   attributes {
+   attributes = {
       DisplayName = "my-awesome-app-updated"
       Notes = "notes_for_developer_app_updated"
 	  custom_attribute_name = "custom_attribute_value_updated"

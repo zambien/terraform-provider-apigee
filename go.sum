@@ -348,6 +348,8 @@ github.com/xiang90/probing v0.0.0-20160813154853-07dd2e8dfe18/go.mod h1:UETIi67q
 github.com/xlab/treeprint v0.0.0-20161029104018-1d6e34225557/go.mod h1:ce1O1j6UtZfjr22oyGxGLbauSBp2YVXpARAosm7dHBg=
 github.com/zambien/go-apigee-edge v0.0.0-20190402181302-7d41f53971c1 h1:YxZab+Dr14skCRI0F/UOk1iAqqtFWU9hq+hf6Gz1Ehc=
 github.com/zambien/go-apigee-edge v0.0.0-20190402181302-7d41f53971c1/go.mod h1:igEzqjjI3Gv0va8lXB1fyhuoqe4xT+QsKUtWTf273r8=
+github.com/zambien/go-apigee-edge v0.0.0-20191101145538-e45257f96262 h1:QD/u8LKwyG+Ac9Vd/EfwMNcbNdBX658a9EpFz+lf2bI=
+github.com/zambien/go-apigee-edge v0.0.0-20191101145538-e45257f96262/go.mod h1:igEzqjjI3Gv0va8lXB1fyhuoqe4xT+QsKUtWTf273r8=
 github.com/zclconf/go-cty v1.0.0/go.mod h1:xnAOWiHeOqg2nWS62VtQ7pbOu17FtxJNW8RLEih+O3s=
 github.com/zclconf/go-cty v1.0.1-0.20190708163926-19588f92a98f h1:sq2p8SN6ji66CFEQFIWLlD/gFmGtr5hBrOzv5nLlGfA=
 github.com/zclconf/go-cty v1.0.1-0.20190708163926-19588f92a98f/go.mod h1:xnAOWiHeOqg2nWS62VtQ7pbOu17FtxJNW8RLEih+O3s=
