@@ -144,17 +144,19 @@ func resourceTargetServerImport(d *schema.ResourceData, meta interface{}) ([]*sc
 	d.Set("port", targetServerData.Port)
 	d.Set("env", IDEnv)
 
-	protocols := flattenStringList(targetServerData.SSLInfo.Protocols)
-	ciphers := flattenStringList(targetServerData.SSLInfo.Ciphers)
+	if targetServerData.SSLInfo != nil {
+		protocols := flattenStringList(targetServerData.SSLInfo.Protocols)
+		ciphers := flattenStringList(targetServerData.SSLInfo.Ciphers)
 
-	d.Set("ssl_info.0.ssl_enabled", targetServerData.SSLInfo.SSLEnabled)
-	d.Set("ssl_info.0.client_auth_enabled", targetServerData.SSLInfo.ClientAuthEnabled)
-	d.Set("ssl_info.0.key_store", targetServerData.SSLInfo.KeyStore)
-	d.Set("ssl_info.0.trust_store", targetServerData.SSLInfo.TrustStore)
-	d.Set("ssl_info.0.key_alias", targetServerData.SSLInfo.KeyAlias)
-	d.Set("ssl_info.0.ciphers", ciphers)
-	d.Set("ssl_info.0.ignore_validation_errors", targetServerData.SSLInfo.IgnoreValidationErrors)
-	d.Set("ssl_info.0.protocols", protocols)
+		d.Set("ssl_info.0.ssl_enabled", targetServerData.SSLInfo.SSLEnabled)
+		d.Set("ssl_info.0.client_auth_enabled", targetServerData.SSLInfo.ClientAuthEnabled)
+		d.Set("ssl_info.0.key_store", targetServerData.SSLInfo.KeyStore)
+		d.Set("ssl_info.0.trust_store", targetServerData.SSLInfo.TrustStore)
+		d.Set("ssl_info.0.key_alias", targetServerData.SSLInfo.KeyAlias)
+		d.Set("ssl_info.0.ciphers", ciphers)
+		d.Set("ssl_info.0.ignore_validation_errors", targetServerData.SSLInfo.IgnoreValidationErrors)
+		d.Set("ssl_info.0.protocols", protocols)
+	}
 
 	return []*schema.ResourceData{d}, nil
 }
@@ -181,17 +183,19 @@ func resourceTargetServerRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("enabled", targetServerData.Enabled)
 	d.Set("port", targetServerData.Port)
 
-	protocols := flattenStringList(targetServerData.SSLInfo.Protocols)
-	ciphers := flattenStringList(targetServerData.SSLInfo.Ciphers)
+	if targetServerData.SSLInfo != nil {
+		protocols := flattenStringList(targetServerData.SSLInfo.Protocols)
+		ciphers := flattenStringList(targetServerData.SSLInfo.Ciphers)
 
-	d.Set("ssl_info.0.ssl_enabled", targetServerData.SSLInfo.SSLEnabled)
-	d.Set("ssl_info.0.client_auth_enabled", targetServerData.SSLInfo.ClientAuthEnabled)
-	d.Set("ssl_info.0.key_store", targetServerData.SSLInfo.KeyStore)
-	d.Set("ssl_info.0.trust_store", targetServerData.SSLInfo.TrustStore)
-	d.Set("ssl_info.0.key_alias", targetServerData.SSLInfo.KeyAlias)
-	d.Set("ssl_info.0.ciphers", ciphers)
-	d.Set("ssl_info.0.ignore_validation_errors", targetServerData.SSLInfo.IgnoreValidationErrors)
-	d.Set("ssl_info.0.protocols", protocols)
+		d.Set("ssl_info.0.ssl_enabled", targetServerData.SSLInfo.SSLEnabled)
+		d.Set("ssl_info.0.client_auth_enabled", targetServerData.SSLInfo.ClientAuthEnabled)
+		d.Set("ssl_info.0.key_store", targetServerData.SSLInfo.KeyStore)
+		d.Set("ssl_info.0.trust_store", targetServerData.SSLInfo.TrustStore)
+		d.Set("ssl_info.0.key_alias", targetServerData.SSLInfo.KeyAlias)
+		d.Set("ssl_info.0.ciphers", ciphers)
+		d.Set("ssl_info.0.ignore_validation_errors", targetServerData.SSLInfo.IgnoreValidationErrors)
+		d.Set("ssl_info.0.protocols", protocols)
+	}
 
 	return nil
 }
@@ -237,22 +241,19 @@ func setTargetServerData(d *schema.ResourceData) (apigee.TargetServer, error) {
 
 	port_int, _ := strconv.Atoi(d.Get("port").(string))
 
-	ciphers := []string{""}
-	if d.Get("ssl_info.0.ciphers") != nil {
-		ciphers = getStringList("ssl_info.0.ciphers", d)
-	}
+	var ssl_info *apigee.SSLInfo
+	if d.Get("ssl_info") != nil {
+		ciphers := []string{""}
+		if d.Get("ssl_info.0.ciphers") != nil {
+			ciphers = getStringList("ssl_info.0.ciphers", d)
+		}
 
-	protocols := []string{""}
-	if d.Get("ssl_info.0.protocols") != nil {
-		protocols = getStringList("ssl_info.0.protocols", d)
-	}
+		protocols := []string{""}
+		if d.Get("ssl_info.0.protocols") != nil {
+			protocols = getStringList("ssl_info.0.protocols", d)
+		}
 
-	targetServer := apigee.TargetServer{
-		Name:    d.Get("name").(string),
-		Host:    d.Get("host").(string),
-		Enabled: d.Get("enabled").(bool),
-		Port:    port_int,
-		SSLInfo: apigee.SSLInfo{
+		ssl_info = &apigee.SSLInfo{
 			SSLEnabled:        d.Get("ssl_info.0.ssl_enabled").(string),
 			ClientAuthEnabled: d.Get("ssl_info.0.client_auth_enabled").(string),
 			KeyStore:          d.Get("ssl_info.0.key_store").(string),
@@ -262,7 +263,15 @@ func setTargetServerData(d *schema.ResourceData) (apigee.TargetServer, error) {
 			//Ciphers: d.Get("ssl_info.0.ciphers").([]string),
 			IgnoreValidationErrors: d.Get("ssl_info.0.ignore_validation_errors").(bool),
 			Protocols:              protocols,
-		},
+		}
+	}
+
+	targetServer := apigee.TargetServer{
+		Name:    d.Get("name").(string),
+		Host:    d.Get("host").(string),
+		Enabled: d.Get("enabled").(bool),
+		Port:    port_int,
+		SSLInfo: ssl_info,
 	}
 
 	return targetServer, nil

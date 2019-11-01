@@ -31,9 +31,9 @@ func TestAccTargetServer_Updated(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"apigee_target_server.foo", "port", "80"),
 					resource.TestCheckResourceAttr(
-						"apigee_target_server.foo", "ssl_info.0.ssl_enabled", "0"),
+						"apigee_target_server.foo", "ssl_info.0.ssl_enabled", "false"),
 					resource.TestCheckResourceAttr(
-						"apigee_target_server.foo", "ssl_info.0.client_auth_enabled", "0"),
+						"apigee_target_server.foo", "ssl_info.0.client_auth_enabled", "false"),
 					resource.TestCheckResourceAttr(
 						"apigee_target_server.foo", "ssl_info.0.ignore_validation_errors", "false"),
 				),
@@ -53,9 +53,9 @@ func TestAccTargetServer_Updated(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"apigee_target_server.foo", "port", "443"),
 					resource.TestCheckResourceAttr(
-						"apigee_target_server.foo", "ssl_info.0.ssl_enabled", "1"),
+						"apigee_target_server.foo", "ssl_info.0.ssl_enabled", "true"),
 					resource.TestCheckResourceAttr(
-						"apigee_target_server.foo", "ssl_info.0.client_auth_enabled", "1"),
+						"apigee_target_server.foo", "ssl_info.0.client_auth_enabled", "true"),
 					resource.TestCheckResourceAttr(
 						"apigee_target_server.foo", "ssl_info.0.key_store", "freetrial"),
 					resource.TestCheckResourceAttr(
@@ -65,9 +65,37 @@ func TestAccTargetServer_Updated(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"apigee_target_server.foo", "ssl_info.0.ignore_validation_errors", "true"),
 					resource.TestCheckResourceAttr(
-						"apigee_target_server.foo", "ssl_info.0.ciphers.0", "AES256"),
+						"apigee_target_server.foo", "ssl_info.0.ciphers.0", "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384"),
 					resource.TestCheckResourceAttr(
-						"apigee_target_server.foo", "ssl_info.0.protocols.0", "https"),
+						"apigee_target_server.foo", "ssl_info.0.protocols.0", "TLSv1.2"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccTargetServer_CreateWithoutSSLInfo(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckTargetServerDestroy,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccCheckTargetServerConfigWithoutSSLInfo,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckTargetServerExists("apigee_target_server.foo", "foo_target_server"),
+					resource.TestCheckResourceAttr(
+						"apigee_target_server.foo", "name", "foo_target_server"),
+					resource.TestCheckResourceAttr(
+						"apigee_target_server.foo", "host", "https://some.api.com"),
+					resource.TestCheckResourceAttr(
+						"apigee_target_server.foo", "env", "test"),
+					resource.TestCheckResourceAttr(
+						"apigee_target_server.foo", "enabled", "true"),
+					resource.TestCheckResourceAttr(
+						"apigee_target_server.foo", "port", "80"),
+					resource.TestCheckNoResourceAttr(
+						"apigee_target_server.foo", "ssl_info.#"),
 				),
 			},
 		},
@@ -126,9 +154,19 @@ resource "apigee_target_server" "foo" {
     trust_store = "freetrial"
     key_alias = "freetrial"
     ignore_validation_errors = true # don't really do this...
-    ciphers = ["AES256"]
-    protocols = ["https"]
+    ciphers = ["TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384"]
+    protocols = ["TLSv1.2"]
   }
+}
+`
+
+const testAccCheckTargetServerConfigWithoutSSLInfo = `
+resource "apigee_target_server" "foo" {
+  name = "foo_target_server"
+  host = "https://some.api.com"
+  env = "test"
+  enabled = true
+  port = 80
 }
 `
 
