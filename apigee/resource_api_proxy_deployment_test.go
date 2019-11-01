@@ -71,14 +71,8 @@ func testAccCheckProxyDeploymentExists(n string, name string) resource.TestCheck
 }
 
 const testAccCheckProxyDeploymentConfigRequired = `
-resource "apigee_api_proxy" "helloworld" {
-   name  		= "helloworld"
-   bundle       = "test-fixtures/helloworld_proxy.zip"
-   bundle_sha   = "${filebase64sha256("test-fixtures/helloworld_proxy.zip")}"
-}
-
 resource "apigee_api_proxy_deployment" "foo_api_proxy_deployment" {
-   proxy_name   = "${apigee_api_proxy.helloworld.name}"
+   proxy_name   = "helloworld"
    org          = "zambien-trial"
    env          = "test"
    revision     = "1"
@@ -86,14 +80,8 @@ resource "apigee_api_proxy_deployment" "foo_api_proxy_deployment" {
 `
 
 const testAccCheckProxyDeploymentConfigUpdated = `
-resource "apigee_api_proxy" "helloworld" {
-   name  		= "helloworld"
-   bundle       = "test-fixtures/helloworld_proxy.zip"
-   bundle_sha   = "${filebase64sha256("test-fixtures/helloworld_proxy.zip")}"
-}
-
 resource "apigee_api_proxy_deployment" "foo_api_proxy_deployment" {
-   proxy_name   = "${apigee_api_proxy.helloworld.name}"
+   proxy_name   = "helloworld"
    org          = "zambien-trial"
    env          = "test"
    revision     = "2"

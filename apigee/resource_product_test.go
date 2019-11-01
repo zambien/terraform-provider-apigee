@@ -89,8 +89,8 @@ func testAccCheckProductExists(n string, name string) resource.TestCheckFunc {
 }
 
 const testAccCheckProductConfigRequired = `
-resource "apigee_api_proxy" "helloworld" {
-   name  		= "helloworld"
+resource "apigee_api_proxy" "tf_helloworld" {
+   name  		= "tf_helloworld"
    bundle       = "test-fixtures/helloworld_proxy.zip"
    bundle_sha   = "${filebase64sha256("test-fixtures/helloworld_proxy.zip")}"
 }
@@ -102,8 +102,8 @@ resource "apigee_product" "foo_product" {
 `
 
 const testAccCheckProductConfigUpdated = `
-resource "apigee_api_proxy" "helloworld" {
-   name  		= "helloworld"
+resource "apigee_api_proxy" "tf_helloworld" {
+   name  		= "tf_helloworld"
    bundle       = "test-fixtures/helloworld_proxy.zip"
    bundle_sha   = "${filebase64sha256("test-fixtures/helloworld_proxy.zip")}"
 }
@@ -115,7 +115,7 @@ resource "apigee_product" "foo_product" {
    approval_type = "auto"
 
    api_resources = ["/**"]
-   proxies = ["${apigee_api_proxy.helloworld.name}"]
+   proxies = ["${apigee_api_proxy.tf_helloworld.name}"]
 
    quota = "1000"
    quota_interval = "2"

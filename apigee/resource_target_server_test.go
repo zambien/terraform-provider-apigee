@@ -23,7 +23,7 @@ func TestAccTargetServer_Updated(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"apigee_target_server.foo", "name", "foo_target_server"),
 					resource.TestCheckResourceAttr(
-						"apigee_target_server.foo", "host", "http://google.com"),
+						"apigee_target_server.foo", "host", "some.api.com"),
 					resource.TestCheckResourceAttr(
 						"apigee_target_server.foo", "env", "test"),
 					resource.TestCheckResourceAttr(
@@ -45,7 +45,7 @@ func TestAccTargetServer_Updated(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"apigee_target_server.foo", "name", "foo_target_server_updated"),
 					resource.TestCheckResourceAttr(
-						"apigee_target_server.foo", "host", "https://some.updatedapi.com"),
+						"apigee_target_server.foo", "host", "some.updatedapi.com"),
 					resource.TestCheckResourceAttr(
 						"apigee_target_server.foo", "env", "test"),
 					resource.TestCheckResourceAttr(
@@ -87,7 +87,7 @@ func TestAccTargetServer_CreateWithoutSSLInfo(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"apigee_target_server.foo", "name", "foo_target_server"),
 					resource.TestCheckResourceAttr(
-						"apigee_target_server.foo", "host", "http://google.com"),
+						"apigee_target_server.foo", "host", "some.api.com"),
 					resource.TestCheckResourceAttr(
 						"apigee_target_server.foo", "env", "test"),
 					resource.TestCheckResourceAttr(
@@ -126,7 +126,7 @@ func testAccCheckTargetServerExists(n string, name string) resource.TestCheckFun
 const testAccCheckTargetServerConfigRequired = `
 resource "apigee_target_server" "foo" {
   name = "foo_target_server"
-  host = "http://google.com"
+  host = "some.api.com"
   env = "test"
   enabled = true
   port = 80
@@ -142,7 +142,7 @@ resource "apigee_target_server" "foo" {
 const testAccCheckTargetServerConfigUpdated = `
 resource "apigee_target_server" "foo" {
   name = "foo_target_server_updated"
-  host = "https://some.updatedapi.com"
+  host = "some.updatedapi.com"
   env = "test"
   enabled = false
   port = 443
@@ -163,7 +163,7 @@ resource "apigee_target_server" "foo" {
 const testAccCheckTargetServerConfigWithoutSSLInfo = `
 resource "apigee_target_server" "foo" {
   name = "foo_target_server"
-  host = "http://google.com"
+  host = "some.api.com"
   env = "test"
   enabled = true
   port = 80
