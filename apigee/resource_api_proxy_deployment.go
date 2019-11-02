@@ -86,7 +86,7 @@ func resourceApiProxyDeploymentRead(d *schema.ResourceData, meta interface{}) (e
 	client := meta.(*apigee.EdgeClient)
 
 	found := false
-	latestRevision := "0"
+	matchedRevision := "0"
 
 	if deployments, _, err := client.Proxies.GetDeployments(d.Get("proxy_name").(string)); err != nil {
 		log.Printf("[ERROR] resourceApiProxyDeploymentRead error getting deployments: %s", err.Error())
@@ -105,7 +105,13 @@ func resourceApiProxyDeploymentRead(d *schema.ResourceData, meta interface{}) (e
 				//We don't break.  Always get the last one if there are multiple deployments.
 				for _, revision := range environment.Revision {
 					log.Printf("[DEBUG] resourceApiProxyDeploymentRead checking deployed revision: %#v for expected revision: %#v\n", revision.Number.String(), d.Get("revision").(string))
-					latestRevision = revision.Number.String()
+					if (d.Get("revision").(string) != "latest" && d.Get("revision").(string) == revision.Number.String()) {
+						matchedRevision = revision.Number.String()
+						found = true
+						break
+					} else {
+						matchedRevision = revision.Number.String()
+					}
 					found = true
 				}
 			}
@@ -113,8 +119,8 @@ func resourceApiProxyDeploymentRead(d *schema.ResourceData, meta interface{}) (e
 	}
 
 	if found {
-		log.Printf("[DEBUG] resourceApiProxyDeploymentRead - deployment found. Revision is: %#v", latestRevision)
-		d.Set("revision", latestRevision)
+		log.Printf("[DEBUG] resourceApiProxyDeploymentRead - deployment found. Revision is: %#v", matchedRevision)
+		d.Set("revision", matchedRevision)
 	} else {
 		log.Print("[DEBUG] resourceApiProxyDeploymentRead - no deployment found")
 		d.SetId("")
@@ -198,6 +204,9 @@ func resourceApiProxyDeploymentUpdate(d *schema.ResourceData, meta interface{}) 
 		}
 		_, _, err = client.Proxies.ReDeploy(proxy_name, env, apigee.Revision(rev), delay, override)
 		if err != nil {
+			if strings.Contains(err.Error(), " is already deployed ") {
+				return resourceApiProxyDeploymentRead(d, meta)
+			}
 			return fmt.Errorf("[ERROR] resourceApiProxyDeploymentUpdate error deploying: %v", err)
 		}
 		log.Printf("[DEBUG] resourceApiProxyDeploymentUpdate Deployed revision %d of %s", rev, proxy_name)
