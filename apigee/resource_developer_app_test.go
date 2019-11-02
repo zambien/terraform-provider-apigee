@@ -44,7 +44,7 @@ func TestAccDeveloperApp_Updated(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"apigee_developer_app.foo_developer_app", "scopes.0", "READ"),
 					resource.TestCheckResourceAttr(
-						"apigee_developer_app.foo_developer_app", "callback_url", "http://www.google.com"),
+						"apigee_developer_app.foo_developer_app", "callback_url", "https://www.google.com"),
 					//match integer
 					resource.TestMatchResourceAttr(
 						"apigee_developer_app.foo_developer_app", "key_expires_in", regexp.MustCompile("^[-+]?\\d+$")),
