@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"time"
 
 	"github.com/gofrs/uuid"
 	"github.com/hashicorp/terraform/helper/schema"
@@ -145,10 +146,23 @@ func resourceApiProxyDelete(d *schema.ResourceData, meta interface{}) error {
 
 	client := meta.(*apigee.EdgeClient)
 
-	_, _, err := client.Proxies.Delete(d.Get("name").(string))
-	if err != nil {
-		log.Printf("[ERROR] resourceApiProxyDelete error deleting api_proxy: %s", err.Error())
-		return fmt.Errorf("[ERROR] resourceApiProxyDelete error deleting api_proxy: %s", err.Error())
+	//We have to handle retries in a special way here since this is a DELETE.  Note this used to work fine without retries.
+	deleted := false
+	tries := 0
+	for !deleted && tries < 3 {
+		_, _, err := client.Proxies.Delete(d.Get("name").(string))
+		if err != nil {
+			//This is a race condition with Apigee APIs.  Wait and try again.
+			if strings.Contains(err.Error(), "Undeploy the ApiProxy and try again") {
+				log.Printf("[ERROR] resourceApiProxyDelete proxy still exists.  We will wait and try again.")
+				time.Sleep(5 * time.Second)
+			} else {
+				log.Printf("[ERROR] resourceApiProxyDelete error deleting api_proxy: %s", err.Error())
+				return fmt.Errorf("[ERROR] resourceApiProxyDelete error deleting api_proxy: %s", err.Error())
+			}
+		}
+		deleted = true
+		tries += tries
 	}
 
 	return nil
