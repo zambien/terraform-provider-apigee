@@ -33,7 +33,7 @@ func resourceCompany() *schema.Resource {
 			},
 			"apps": {
 				Type:     schema.TypeList,
-				Optional: true,
+				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"status": {
@@ -146,11 +146,6 @@ func setCompanyData(d *schema.ResourceData) (apigee.Company, error) {
 		d.Set("display_name", d.Get("name"))
 	}
 
-	apps := []string{""}
-	if d.Get("apps") != nil {
-		apps = getStringList("apps", d)
-	}
-
 	attributes := []apigee.Attribute{}
 	if d.Get("attributes") != nil {
 		attributes = attributesFromMap(d.Get("attributes").(map[string]interface{}))
@@ -161,7 +156,6 @@ func setCompanyData(d *schema.ResourceData) (apigee.Company, error) {
 		DisplayName: d.Get("display_name").(string),
 		Attributes:  attributes,
 
-		Apps:   apps,
 		Status: d.Get("status").(string),
 	}
 

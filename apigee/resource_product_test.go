@@ -44,7 +44,7 @@ func TestAccProduct_Updated(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"apigee_product.foo_product", "api_resources.0", "/**"),
 					resource.TestCheckResourceAttr(
-						"apigee_product.foo_product", "proxies.0", "helloworld"),
+						"apigee_product.foo_product", "proxies.0", "tf_helloworld"),
 					resource.TestCheckResourceAttr(
 						"apigee_product.foo_product", "quota", "1000"),
 					resource.TestCheckResourceAttr(
