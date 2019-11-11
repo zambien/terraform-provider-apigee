@@ -40,7 +40,7 @@ func resourceDeveloper() *schema.Resource {
 			},
 			"apps": {
 				Type:     schema.TypeList,
-				Optional: true,
+				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"developer_id": {
@@ -151,11 +151,6 @@ func setDeveloperData(d *schema.ResourceData) (apigee.Developer, error) {
 
 	log.Print("[DEBUG] setDeveloperData START")
 
-	apps := []string{""}
-	if d.Get("apps") != nil {
-		apps = getStringList("apps", d)
-	}
-
 	attributes := []apigee.Attribute{}
 	if d.Get("attributes") != nil {
 		attributes = attributesFromMap(d.Get("attributes").(map[string]interface{}))
@@ -167,7 +162,6 @@ func setDeveloperData(d *schema.ResourceData) (apigee.Developer, error) {
 		LastName:   d.Get("last_name").(string),
 		UserName:   d.Get("user_name").(string),
 		Attributes: attributes,
-		Apps:       apps,
 	}
 
 	return Developer, nil

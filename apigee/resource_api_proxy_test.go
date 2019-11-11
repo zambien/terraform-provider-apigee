@@ -70,7 +70,7 @@ const testAccCheckProxyConfigRequired = `
 resource "apigee_api_proxy" "foo_api_proxy" {
    name  		= "foo_proxy_terraformed"
    bundle       = "test-fixtures/helloworld_proxy.zip"
-   bundle_sha   = "${base64sha256(file("test-fixtures/helloworld_proxy.zip"))}"
+   bundle_sha   = "${filebase64sha256("test-fixtures/helloworld_proxy.zip")}"
 }
 `
 
@@ -78,7 +78,7 @@ const testAccCheckProxyConfigUpdated = `
 resource "apigee_api_proxy" "foo_api_proxy" {
    name  		= "foo_proxy_terraformed_updated"
    bundle       = "test-fixtures/helloworld_proxy.zip"
-   bundle_sha   = "${base64sha256(file("test-fixtures/helloworld_proxy.zip"))}"
+   bundle_sha   = "${filebase64sha256("test-fixtures/helloworld_proxy.zip")}"
 }
 `
 

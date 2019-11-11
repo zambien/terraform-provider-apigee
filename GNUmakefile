@@ -3,15 +3,8 @@ GOFMT_FILES?=$$(find . -name '*.go' |grep -v vendor)
 
 default: build
 
-build: vendor fmtcheck
+build: fmtcheck
 	CGO_ENABLED=0 go install -ldflags '-w -extldflags "-static"'
-
-GLIDE := $(shell command -v glide 2> /dev/null)
-ifndef GLIDE
-$(error "glide is not available. Install using `curl https://glide.sh/get | sh`" or if on Mac `brew install glide`)
-endif
-vendor: glide.yaml ## Install vendor dependencies
-	glide update --no-recursive
 
 test: fmtcheck
 	go test -i $(TEST) || exit 1

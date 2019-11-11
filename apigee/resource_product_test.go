@@ -44,7 +44,7 @@ func TestAccProduct_Updated(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"apigee_product.foo_product", "api_resources.0", "/**"),
 					resource.TestCheckResourceAttr(
-						"apigee_product.foo_product", "proxies.0", "helloworld"),
+						"apigee_product.foo_product", "proxies.0", "tf_helloworld"),
 					resource.TestCheckResourceAttr(
 						"apigee_product.foo_product", "quota", "1000"),
 					resource.TestCheckResourceAttr(
@@ -89,6 +89,12 @@ func testAccCheckProductExists(n string, name string) resource.TestCheckFunc {
 }
 
 const testAccCheckProductConfigRequired = `
+resource "apigee_api_proxy" "tf_helloworld" {
+   name  		= "tf_helloworld"
+   bundle       = "test-fixtures/helloworld_proxy.zip"
+   bundle_sha   = "${filebase64sha256("test-fixtures/helloworld_proxy.zip")}"
+}
+
 resource "apigee_product" "foo_product" {
    name = "foo_product"
    approval_type = "manual"
@@ -96,6 +102,12 @@ resource "apigee_product" "foo_product" {
 `
 
 const testAccCheckProductConfigUpdated = `
+resource "apigee_api_proxy" "tf_helloworld" {
+   name  		= "tf_helloworld"
+   bundle       = "test-fixtures/helloworld_proxy.zip"
+   bundle_sha   = "${filebase64sha256("test-fixtures/helloworld_proxy.zip")}"
+}
+
 resource "apigee_product" "foo_product" {
    name = "foo_product_updated"
    display_name = "foo_product_updated_different"
@@ -103,7 +115,7 @@ resource "apigee_product" "foo_product" {
    approval_type = "auto"
 
    api_resources = ["/**"]
-   proxies = ["helloworld"]
+   proxies = ["${apigee_api_proxy.tf_helloworld.name}"]
 
    quota = "1000"
    quota_interval = "2"
@@ -111,7 +123,7 @@ resource "apigee_product" "foo_product" {
 
    scopes = ["READ"]
 
-   attributes {
+   attributes = {
       access = "public"
 
       custom1 = "customval1"
