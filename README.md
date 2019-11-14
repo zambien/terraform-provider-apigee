@@ -182,6 +182,30 @@ resource "apigee_company_app" "helloworld_company_app" {
    callback_url = "https://www.google.com"
 }
 
+# Create the shared flow bundle pretty much the same way you create the proxy bundle.
+data "archive_file" "sharedflow_bundle" {
+   type         = "zip"
+   source_dir   = "${path.module}/sharedflow_files"
+   output_path  = "${path.module}/sharedflow_files_bundle/sharedflow.zip"
+}
+
+# The Shared Flow
+resource "apigee_shared_flow" "helloworld_shared_flow" {
+   name         = "helloworld-sharedflow-terraformed"                         # The shared flow's name.
+   bundle       = "${data.archive_file.sharedflow_bundle.output_path}"        # Apigee APIs require a zip bundle to import a shared flow.
+   bundle_sha   = "${data.archive_file.sharedflow_bundle.output_sha}"         # The SHA is used to detect changes for plan/apply.
+}
+
+# A Shared Flow deployment
+resource "apigee_shared_flow_deployment" "helloworld_shared_flow_deployment" {
+   shared_flow_name   = "${apigee_shared_flow.helloworld_shared_flow.name}"
+   org                = "${var.org}"
+   env                = "${var.env}"
+
+   # NOTE: revision = "latest" 
+   # will deploy the latest revision of the shared flow 
+   revision     = "${apigee_shared_flow.helloworld_shared_flow.revision}"
+}
 ```
 
 ## Contributions
