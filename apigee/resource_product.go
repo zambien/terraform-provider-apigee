@@ -158,11 +158,6 @@ func resourceProductRead(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	apiResources := flattenStringList(ProductData.ApiResources)
-	proxies := flattenStringList(ProductData.Proxies)
-	scopes := flattenStringList(ProductData.Scopes)
-	environments := flattenStringList(ProductData.Environments)
-
 	d.Set("name", ProductData.Name)
 
 	if ProductData.DisplayName == "" {
@@ -174,13 +169,14 @@ func resourceProductRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("description", ProductData.Description)
 	d.Set("approval_type", ProductData.ApprovalType)
 	d.Set("attributes", ProductData.Attributes)
-	d.Set("apiResource", apiResources)
-	d.Set("proxies", proxies)
 	d.Set("quota", ProductData.Quota)
 	d.Set("quota_interval", ProductData.QuotaInterval)
 	d.Set("quota_time_unit", ProductData.QuotaTimeUnit)
-	d.Set("environments", environments)
-	d.Set("scopes", scopes)
+
+	updateResourceOnSortedArrayChange(d, "apiResource", ProductData.ApiResources)
+	updateResourceOnSortedArrayChange(d, "proxies", ProductData.Proxies)
+	updateResourceOnSortedArrayChange(d, "environments", ProductData.Environments)
+	updateResourceOnSortedArrayChange(d, "scopes", ProductData.Scopes)
 
 	return nil
 }
