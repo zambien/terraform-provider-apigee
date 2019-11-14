@@ -2,12 +2,13 @@ package apigee
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
-	"github.com/zambien/go-apigee-edge"
 	"log"
 	"strings"
 	"testing"
+
+	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform/terraform"
+	"github.com/zambien/go-apigee-edge"
 )
 
 func TestAccProduct_Updated(t *testing.T) {
@@ -108,6 +109,18 @@ resource "apigee_api_proxy" "tf_helloworld" {
    bundle_sha   = "${filebase64sha256("test-fixtures/helloworld_proxy.zip")}"
 }
 
+resource "apigee_api_proxy" "tf_helloworld_2" {
+   name  		= "tf_helloworld_2"
+   bundle       = "test-fixtures/helloworld_proxy.zip"
+   bundle_sha   = "${filebase64sha256("test-fixtures/helloworld_proxy.zip")}"
+ }
+
+resource "apigee_api_proxy" "tf_helloworld_3" {
+   name  		= "tf_helloworld_3"
+   bundle       = "test-fixtures/helloworld_proxy.zip"
+   bundle_sha   = "${filebase64sha256("test-fixtures/helloworld_proxy.zip")}"
+}
+
 resource "apigee_product" "foo_product" {
    name = "foo_product_updated"
    display_name = "foo_product_updated_different"
@@ -115,7 +128,7 @@ resource "apigee_product" "foo_product" {
    approval_type = "auto"
 
    api_resources = ["/**"]
-   proxies = ["${apigee_api_proxy.tf_helloworld.name}"]
+   proxies = ["${apigee_api_proxy.tf_helloworld.name}", "${apigee_api_proxy.tf_helloworld_2.name}", "${apigee_api_proxy.tf_helloworld_3.name}"]
 
    quota = "1000"
    quota_interval = "2"
