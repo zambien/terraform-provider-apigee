@@ -1,10 +1,11 @@
 package apigee
 
 import (
-	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/zambien/go-apigee-edge"
 	"reflect"
 	"sort"
+
+	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/zambien/go-apigee-edge"
 )
 
 func flattenStringList(list []string) []interface{} {
@@ -74,4 +75,11 @@ func arraySortedEqual(a, b []string) bool {
 	sort.Strings(b_copy)
 
 	return reflect.DeepEqual(a_copy, b_copy)
+}
+
+func updateResourceOnSortedArrayChange(d *schema.ResourceData, key string, newValues []string) {
+	currentValues := getStringList(key, d)
+	if currentValues != nil && !arraySortedEqual(currentValues, newValues) {
+		d.Set(key, newValues)
+	}
 }
