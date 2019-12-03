@@ -105,7 +105,7 @@ func resourceApiProxyDeploymentRead(d *schema.ResourceData, meta interface{}) (e
 				//We don't break.  Always get the last one if there are multiple deployments.
 				for _, revision := range environment.Revision {
 					log.Printf("[DEBUG] resourceApiProxyDeploymentRead checking deployed revision: %#v for expected revision: %#v\n", revision.Number.String(), d.Get("revision").(string))
-					if (d.Get("revision").(string) != "latest" && d.Get("revision").(string) == revision.Number.String()) {
+					if d.Get("revision").(string) != "latest" && d.Get("revision").(string) == revision.Number.String() {
 						matchedRevision = revision.Number.String()
 						found = true
 						break
