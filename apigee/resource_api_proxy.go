@@ -160,9 +160,13 @@ func resourceApiProxyDelete(d *schema.ResourceData, meta interface{}) error {
 				log.Printf("[ERROR] resourceApiProxyDelete error deleting api_proxy: %s", err.Error())
 				return fmt.Errorf("[ERROR] resourceApiProxyDelete error deleting api_proxy: %s", err.Error())
 			}
+		} else {
+			deleted = true
 		}
-		deleted = true
-		tries += tries
+		tries += 1
+	}
+	if !deleted {
+		return fmt.Errorf("[ERROR] unable to delete ApiProxy")
 	}
 
 	return nil
