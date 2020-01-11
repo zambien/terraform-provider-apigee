@@ -120,8 +120,8 @@ resource "apigee_target_server" "helloworld_target_server_testing" {
    port = 8080
 
    ssl_info {
-      ssl_enabled = false
-      client_auth_enabled = false
+      ssl_enabled = "false"
+      client_auth_enabled = "false"
       key_store = ""
       trust_store = ""
       key_alias = ""
