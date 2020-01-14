@@ -28,9 +28,9 @@ func resourceApiProxyDeployment() *schema.Resource {
 				ForceNew: true,
 			},
 			"org": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "org is not required, the value from the provider is used.",
 			},
 			"env": {
 				Type:     schema.TypeString,
