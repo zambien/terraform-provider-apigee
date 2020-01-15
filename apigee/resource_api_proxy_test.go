@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/zambien/go-apigee-edge"
 	"log"
+	"regexp"
 	"strings"
 	"testing"
 )
@@ -40,6 +41,36 @@ func TestAccProxy_Updated(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"apigee_api_proxy.foo_api_proxy", "revision", "1"),
 				),
+			},
+		},
+	})
+}
+
+func TestAccProxy_FailToDeleteWhenDeploymentExists(t *testing.T) {
+	proxyName := "foo_proxy_terraformed_delete_test"
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+
+		CheckDestroy: testAccCheckProxyDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckProxyConfigDeleteTest,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckProxyExists("apigee_api_proxy.foo_api_proxy", proxyName),
+					resource.TestCheckResourceAttr("apigee_api_proxy.foo_api_proxy", "name", proxyName),
+				),
+			},
+			{
+				Config:      testAccCheckProxyConfigDeleteTest,
+				Destroy:     true,
+				PreConfig:   deployProxy(t, proxyName),
+				ExpectError: regexp.MustCompile("unable to delete ApiProxy"),
+			},
+			{
+				Config:    testAccCheckProxyConfigDeleteTest,
+				Destroy:   true,
+				PreConfig: undeployProxy(t, proxyName),
 			},
 		},
 	})
@@ -82,16 +113,27 @@ resource "apigee_api_proxy" "foo_api_proxy" {
 }
 `
 
+const testAccCheckProxyConfigDeleteTest = `
+resource "apigee_api_proxy" "foo_api_proxy" {
+   name  		= "foo_proxy_terraformed_delete_test"
+   bundle       = "test-fixtures/helloworld_proxy.zip"
+   bundle_sha   = "${filebase64sha256("test-fixtures/helloworld_proxy.zip")}"
+}
+`
+
 func proxyDestroyHelper(s *terraform.State, client *apigee.EdgeClient) error {
 
 	for _, r := range s.RootModule().Resources {
+		if r.Type != "apigee_api_proxy" {
+			continue
+		}
 		id := r.Primary.ID
 
 		if id == "" {
 			return fmt.Errorf("No proxy ID is set")
 		}
 
-		_, _, err := client.Proxies.Get("foo_proxy")
+		_, _, err := client.Proxies.Get(r.Primary.Attributes["name"])
 
 		if err != nil {
 			if strings.Contains(err.Error(), "404 ") {
@@ -101,7 +143,7 @@ func proxyDestroyHelper(s *terraform.State, client *apigee.EdgeClient) error {
 		}
 	}
 
-	return fmt.Errorf("Proxy still exists")
+	return nil
 }
 
 func proxyExistsHelper(s *terraform.State, client *apigee.EdgeClient, name string) error {
@@ -121,4 +163,28 @@ func proxyExistsHelper(s *terraform.State, client *apigee.EdgeClient, name strin
 
 	}
 	return nil
+}
+
+func deployProxy(t *testing.T, proxyName string) func() {
+	return func() {
+		client := testAccProvider.Meta().(*apigee.EdgeClient)
+		_, _, err := client.Proxies.Deploy(proxyName, "test", 1, 1, false)
+		if err != nil {
+			t.Logf("[ERROR] Could not deploy proxy: %s, %s", proxyName, err)
+		} else {
+			t.Logf("Deployed proxy: %s", proxyName)
+		}
+	}
+}
+
+func undeployProxy(t *testing.T, proxyName string) func() {
+	return func() {
+		client := testAccProvider.Meta().(*apigee.EdgeClient)
+		_, _, err := client.Proxies.Undeploy(proxyName, "test", 1)
+		if err != nil {
+			t.Logf("[ERROR] Could not undeploy proxy: %s, %s", proxyName, err)
+		} else {
+			t.Logf("Undeployed proxy: %s", proxyName)
+		}
+	}
 }
