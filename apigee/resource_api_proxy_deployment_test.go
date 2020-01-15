@@ -23,8 +23,6 @@ func TestAccProxyDeployment_Updated(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"apigee_api_proxy_deployment.foo_api_proxy_deployment", "proxy_name", "foo_proxy_terraformed"),
 					resource.TestCheckResourceAttr(
-						"apigee_api_proxy_deployment.foo_api_proxy_deployment", "org", "zambien-trial"),
-					resource.TestCheckResourceAttr(
 						"apigee_api_proxy_deployment.foo_api_proxy_deployment", "revision", "1"),
 				),
 			},
@@ -35,8 +33,6 @@ func TestAccProxyDeployment_Updated(t *testing.T) {
 					testAccCheckProxyDeploymentExists("apigee_api_proxy_deployment.foo_api_proxy_deployment", "foo_proxy_terraformed"),
 					resource.TestCheckResourceAttr(
 						"apigee_api_proxy_deployment.foo_api_proxy_deployment", "proxy_name", "foo_proxy_terraformed"),
-					resource.TestCheckResourceAttr(
-						"apigee_api_proxy_deployment.foo_api_proxy_deployment", "org", "zambien-trial"),
 					resource.TestCheckResourceAttr(
 						"apigee_api_proxy_deployment.foo_api_proxy_deployment", "revision", "2"),
 					resource.TestCheckResourceAttr(
@@ -95,7 +91,6 @@ resource "apigee_api_proxy" "foo_api_proxy" {
 
 resource "apigee_api_proxy_deployment" "foo_api_proxy_deployment" {
    proxy_name   = "${apigee_api_proxy.foo_api_proxy.name}"
-   org          = "zambien-trial"
    env          = "test"
    revision     = "2"
    delay		= "2"
