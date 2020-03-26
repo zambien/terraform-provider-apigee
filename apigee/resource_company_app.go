@@ -36,6 +36,11 @@ func resourceCompanyApp() *schema.Resource {
 				Type:     schema.TypeMap,
 				Optional: true,
 			},
+			"credentials": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeMap},
+			},
 			"scopes": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -108,6 +113,8 @@ func resourceCompanyAppRead(d *schema.ResourceData, meta interface{}) error {
 	//you might only ever have one credential... we'll see.
 	scopes := flattenStringList(CompanyAppData.Credentials[0].Scopes)
 
+	credentials := mapFromCredentials(CompanyAppData.Credentials)
+
 	//Apigee does not return products in the order you send them
 	oldApiProducts := getStringList("api_products", d)
 	newApiProducts := apiProductsListFromCredentials(CompanyAppData.Credentials[0].ApiProducts)
@@ -120,6 +127,7 @@ func resourceCompanyAppRead(d *schema.ResourceData, meta interface{}) error {
 
 	d.Set("name", CompanyAppData.Name)
 	d.Set("attributes", CompanyAppData.Attributes)
+	d.Set("credentials", credentials)
 	d.Set("scopes", scopes)
 	d.Set("callback_url", CompanyAppData.CallbackUrl)
 	d.Set("app_id", CompanyAppData.AppId)

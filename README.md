@@ -260,25 +260,3 @@ goreleaser # actually create the release
 You can read more about goreleaser here:
 
 https://goreleaser.com/
-
-## Important Known Issues
-
-Right now if you rev your proxy bundle then apply your deployment will not update automatically if you reference that proxy rev (as in the example above).
-
-To work around the issue you can apply twice:
-```
-terraform apply && terraform apply
-```
-
-Or manually change the revision number in a variable or in the script...
-```
-resource "apigee_api_proxy_deployment" "helloworld_proxy_deployment" {
-   proxy_name   = "${apigee_api_proxy.helloworld_proxy.name}"
-   org          = "${var.org}"
-   env          = "${var.env}"
-   revision     = 4 # the known next revision number
-}
-```
-
-This is happening due to a known issue in Terraform that should be fixed soon:
-https://github.com/hashicorp/terraform/issues/15857
