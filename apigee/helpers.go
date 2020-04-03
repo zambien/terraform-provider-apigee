@@ -1,6 +1,7 @@
 package apigee
 
 import (
+	"github.com/17media/structs"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/zambien/go-apigee-edge"
 	"reflect"
@@ -54,6 +55,18 @@ func attributesFromMap(attributes map[string]interface{}) []apigee.Attribute {
 			Value: v.(string),
 		}
 		result = append(result, t)
+	}
+
+	return result
+}
+
+func mapFromCredentials(credentials []apigee.Credential) []interface{} {
+
+	result := make([]interface{}, 0, len(credentials))
+
+	for _, elem := range credentials {
+		credentialMap := structs.Map(elem)
+		result = append(result, credentialMap)
 	}
 
 	return result
