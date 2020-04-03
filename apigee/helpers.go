@@ -1,11 +1,10 @@
 package apigee
 
 import (
-	"reflect"
-	"sort"
-
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/zambien/go-apigee-edge"
+	"reflect"
+	"sort"
 )
 
 func flattenStringList(list []string) []interface{} {
