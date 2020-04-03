@@ -36,14 +36,75 @@ func resourceCompanyApp() *schema.Resource {
 				Type:     schema.TypeMap,
 				Optional: true,
 			},
+			"test": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			/*
 			"credentials": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeMap},
+			},*/
+			"credentials": {
+				Type:     schema.TypeList,
+				Computed: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"consumer_key": &schema.Schema{
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"consumer_secret": &schema.Schema{
+							Type:     schema.TypeString,
+							Required: true,
+						},
+					},
+				},
+			},
+			"ssl_info": &schema.Schema{
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"ssl_enabled": &schema.Schema{
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"client_auth_enabled": &schema.Schema{
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"key_store": &schema.Schema{
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"trust_store": &schema.Schema{
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"key_alias": &schema.Schema{
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"ciphers": &schema.Schema{
+							Type:     schema.TypeList,
+							Optional: true,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+						},
+						"protocols": &schema.Schema{
+							Type:     schema.TypeList,
+							Optional: true,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+						},
+					},
+				},
 			},
 			"scopes": {
 				Type:     schema.TypeList,
-				Optional: true,
+				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"callback_url": {
@@ -115,6 +176,19 @@ func resourceCompanyAppRead(d *schema.ResourceData, meta interface{}) error {
 
 	credentials := mapFromCredentials(CompanyAppData.Credentials)
 
+	//credentials_again
+	if CompanyAppData.Credentials != nil {
+
+		log.Print("[DEBUG] resourceCompanyAppRead credentials ConsumerKey: ", CompanyAppData.Credentials[0].ConsumerKey)
+		log.Print("[DEBUG] resourceCompanyAppRead credentials ConsumerSecret: ", CompanyAppData.Credentials[0].ConsumerSecret)
+
+		d.Set("credentials.0.consumer_key", CompanyAppData.Credentials[0].ConsumerKey)
+		d.Set("credentials.0.consumer_secret", CompanyAppData.Credentials[0].ConsumerSecret)
+
+		log.Print("[DEBUG] resourceCompanyAppRead credentials: ", d.Get("credentials.0"))
+		log.Print("[DEBUG] resourceCompanyAppRead credentials consumer key: ", d.Get("credentials.0.consumer_key"))
+	}
+
 	//Apigee does not return products in the order you send them
 	oldApiProducts := getStringList("api_products", d)
 	newApiProducts := apiProductsListFromCredentials(CompanyAppData.Credentials[0].ApiProducts)
@@ -125,14 +199,17 @@ func resourceCompanyAppRead(d *schema.ResourceData, meta interface{}) error {
 		d.Set("api_products", oldApiProducts)
 	}
 
+	d.Set("test","tester")
 	d.Set("name", CompanyAppData.Name)
 	d.Set("attributes", CompanyAppData.Attributes)
-	d.Set("credentials", credentials)
+	d.Set("credentials", CompanyAppData.Credentials)
 	d.Set("scopes", scopes)
 	d.Set("callback_url", CompanyAppData.CallbackUrl)
 	d.Set("app_id", CompanyAppData.AppId)
 	d.Set("company_name", CompanyAppData.CompanyName)
 	d.Set("status", CompanyAppData.Status)
+
+	log.Print("[DEBUG] resourceCompanyAppRead credentials: ", credentials)
 
 	return nil
 }
@@ -182,6 +259,21 @@ func setCompanyAppData(d *schema.ResourceData) (apigee.CompanyApp, error) {
 		apiProducts = getStringList("api_products", d)
 	}
 
+	log.Print("[DEBUG] setCompanyAppData credentials: ", d.Get("credentials"))
+	var credentials []apigee.Credential
+	if d.Get("credentials") != nil {
+
+		credentialsMap := d.Get("credentials").([]interface{})
+
+		for elem := range credentialsMap {
+
+
+			log.Printf("[DEBUG] setCompanyAppData credentialsMap element: %v", elem)
+
+			//credentials = append(result, t)
+		}
+	}
+
 	scopes := []string{""}
 	if d.Get("scopes") != nil {
 		scopes = getStringList("scopes", d)
@@ -198,6 +290,7 @@ func setCompanyAppData(d *schema.ResourceData) (apigee.CompanyApp, error) {
 		Attributes:  attributes,
 		ApiProducts: apiProducts,
 		Scopes:      scopes,
+		Credentials: credentials,
 		CallbackUrl: d.Get("callback_url").(string),
 	}
 
