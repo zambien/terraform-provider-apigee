@@ -46,6 +46,10 @@ func resourceApiProxy() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"deploy_test_revision_alone": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
 		},
 	}
 }
@@ -68,7 +72,11 @@ func resourceApiProxyCreate(d *schema.ResourceData, meta interface{}) error {
 	d.Set("name", d.Get("name").(string))
 	d.Set("revision", proxyRev.Revision.String())
 	d.Set("revision_sha", d.Get("bundle_sha").(string))
-
+	if d.Get("deploy_test_revision_alone").(bool) {
+		d.Set("deploy_test_revision_alone", d.Get("deploy_test_revision_alone").(bool))
+	} else {
+		d.Set("deploy_test_revision_alone", false)
+	}
 	return resourceApiProxyRead(d, meta)
 }
 
@@ -104,6 +112,35 @@ func resourceApiProxyRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	latest_rev := strconv.Itoa(len(u.Revisions))
+
+	if d.Get("deploy_test_revision_alone").(bool) {
+		// Only returns environments in use and their revision
+		proxyDeployment, _, err := client.Proxies.GetDeployments(d.Get("name").(string))
+		if err != nil {
+			log.Printf("[ERROR] resourceApiProxyRead error reading proxy deployment: %s", err.Error())
+			if strings.Contains(err.Error(), "404 ") {
+				log.Printf("[DEBUG] resourceApiProxyRead 404 encountered.  Must be a new proxy: %#v", d.Get("name").(string))
+			} else {
+				return fmt.Errorf("[ERROR] resourceApiProxyRead error reading proxy deployment: %s", err.Error())
+			}
+		}
+		currentLatestRev := d.Get("revision").(string)
+		currentLatestRevHasImportantEnv := false
+		for _, env := range proxyDeployment.Environments {
+			for _, rev := range env.Revision {
+				log.Printf("[DEBUG] resourceApiProxyRead.  revision information: %+v", rev)
+				if currentLatestRev == rev.Number.String() && rev.State == "deployed" && env.Name != "test" {
+					currentLatestRevHasImportantEnv = true
+					break
+				}
+			}
+		}
+		// If the latest revision only has the test environment, or does not have any environment attached to it, update the latest revision.
+		if !currentLatestRevHasImportantEnv {
+			log.Printf("[DEBUG] resourceApiProxyRead. Latest revision has no environemtns: %s", currentLatestRev)
+			latest_rev = currentLatestRev
+		}
+	}
 
 	log.Printf("[DEBUG] resourceApiProxyRead.  revision_sha before: %#v", d.Get("revision_sha").(string))
 	d.Set("revision_sha", d.Get("bundle_sha").(string))
