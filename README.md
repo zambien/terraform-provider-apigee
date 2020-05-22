@@ -13,11 +13,13 @@ I needed a way to deploy to the environment "test" without always creating a new
 Here is an example of how the code used to perform:
 Here we have 2 revisions.
 |Revisions|Environment|
+|---|---|
 |2|test|
 |1|stage|
 
 If the proxy code was deployed in old way, it would look like this:
 |Revisions|Environment|
+|---|---|
 |3||
 |2|test|
 |1|stage|
@@ -25,6 +27,7 @@ If the proxy code was deployed in old way, it would look like this:
 And again:
 If the proxy code was deployed in old way, it would look like this:
 |Revisions|Environment|
+|---|---|
 |4||
 |3||
 |2|test|
@@ -32,6 +35,7 @@ If the proxy code was deployed in old way, it would look like this:
 
 Say test was to be pointed at the latest. You have this:
 |Revisions|Environment|
+|---|---|
 |4|test|
 |3||
 |2||
@@ -39,6 +43,7 @@ Say test was to be pointed at the latest. You have this:
 
 And then I updated the deployment code, you would be left with this:
 |Revisions|Environment|
+|---|---|
 |5||
 |4|test|
 |3||
@@ -52,22 +57,26 @@ I did not like this as a new revision for every mistake someone makes causes too
 Here is an example of how the code used to perform:
 Here we have 2 revisions.
 |Revisions|Environment|
+|---|---|
 |2|test|
 |1|stage|
 
 If the proxy code was deployed in new way, it would look like this:
 |Revisions|Environment|
+|---|---|
 |2|test|
 |1|stage|
 
 And again:
 If the proxy code was deployed in new way, it would look like this:
 |Revisions|Environment|
+|---|---|
 |2|test|
 |1|stage|
 
 Say test was to be pointed at the latest. You have this:
 |Revisions|Environment|
+|---|---|
 |2|test|
 |1|stage|
 
@@ -76,16 +85,19 @@ See how nice that is? But lets see a few more examples if the environment was no
 Here is an example of how the code used to perform:
 Here we have 2 revisions.
 |Revisions|Environment|
+|---|---|
 |2|test|
 |1|stage|
 
 Now you promote the stage revision to the latest, like this:
 |Revisions|Environment|
+|---|---|
 |2|test,stage|
 |1||
 
 If the proxy code was updated and deployed, it would now look like this:
 |Revisions|Environment|
+|---|---|
 |3|test|
 |2|stage|
 |1||
@@ -94,6 +106,7 @@ You see that? It created a new revision, and promoted test to it. Now, I have no
 
 Next time changes are made to the proxy:
 |Revisions|Environment|
+|---|---|
 |3|test|
 |2|stage|
 |1||
