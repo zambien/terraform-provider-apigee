@@ -9,7 +9,7 @@ import (
 
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/zambien/go-apigee-edge"
+	"github.com/ChrisLanks/go-apigee-edge"
 )
 
 func TestAccProxy_Updated(t *testing.T) {

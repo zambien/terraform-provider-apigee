@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/hashicorp/terraform/plugin"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/zambien/terraform-provider-apigee/apigee"
+	"github.com/ChrisLanks/terraform-provider-apigee/apigee"
 )
 
 func main() {

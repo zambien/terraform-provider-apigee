@@ -8,7 +8,7 @@ import (
 
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/zambien/go-apigee-edge"
+	"github.com/ChrisLanks/go-apigee-edge"
 )
 
 func TestAccSharedFlowDeployment_Updated(t *testing.T) {
@@ -24,7 +24,7 @@ func TestAccSharedFlowDeployment_Updated(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"apigee_shared_flow_deployment.foo_shared_flow_deployment", "shared_flow_name", "foo_shared_flow_terraformed"),
 					resource.TestCheckResourceAttr(
-						"apigee_shared_flow_deployment.foo_shared_flow_deployment", "org", "zambien-trial"),
+						"apigee_shared_flow_deployment.foo_shared_flow_deployment", "org", "ChrisLanks-trial"),
 					resource.TestCheckResourceAttr(
 						"apigee_shared_flow_deployment.foo_shared_flow_deployment", "revision", "1"),
 				),
@@ -37,7 +37,7 @@ func TestAccSharedFlowDeployment_Updated(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"apigee_shared_flow_deployment.foo_shared_flow_deployment", "shared_flow_name", "foo_shared_flow_terraformed"),
 					resource.TestCheckResourceAttr(
-						"apigee_shared_flow_deployment.foo_shared_flow_deployment", "org", "zambien-trial"),
+						"apigee_shared_flow_deployment.foo_shared_flow_deployment", "org", "ChrisLanks-trial"),
 					resource.TestCheckResourceAttr(
 						"apigee_shared_flow_deployment.foo_shared_flow_deployment", "revision", "2"),
 					resource.TestCheckResourceAttr(
@@ -80,7 +80,7 @@ resource "apigee_shared_flow" "foo_shared_flow" {
 
 resource "apigee_shared_flow_deployment" "foo_shared_flow_deployment" {
    shared_flow_name   = apigee_shared_flow.foo_shared_flow.name
-   org          = "zambien-trial"
+   org          = "ChrisLanks-trial"
    env          = "test"
    revision     = "1"
 }
@@ -96,7 +96,7 @@ resource "apigee_shared_flow" "foo_shared_flow" {
 
 resource "apigee_shared_flow_deployment" "foo_shared_flow_deployment" {
    shared_flow_name   = apigee_shared_flow.foo_shared_flow.name
-   org          = "zambien-trial"
+   org          = "ChrisLanks-trial"
    env          = "test"
    revision     = "2"
    delay		= "2"

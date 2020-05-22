@@ -8,9 +8,9 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/ChrisLanks/go-apigee-edge"
 	"github.com/gofrs/uuid"
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/zambien/go-apigee-edge"
 )
 
 func resourceApiProxy() *schema.Resource {
@@ -113,35 +113,6 @@ func resourceApiProxyRead(d *schema.ResourceData, meta interface{}) error {
 
 	latest_rev := strconv.Itoa(len(u.Revisions))
 
-	if d.Get("deploy_test_revision_alone").(bool) {
-		// Only returns environments in use and their revision
-		proxyDeployment, _, err := client.Proxies.GetDeployments(d.Get("name").(string))
-		if err != nil {
-			log.Printf("[ERROR] resourceApiProxyRead error reading proxy deployment: %s", err.Error())
-			if strings.Contains(err.Error(), "404 ") {
-				log.Printf("[DEBUG] resourceApiProxyRead 404 encountered.  Must be a new proxy: %#v", d.Get("name").(string))
-			} else {
-				return fmt.Errorf("[ERROR] resourceApiProxyRead error reading proxy deployment: %s", err.Error())
-			}
-		}
-		currentLatestRev := d.Get("revision").(string)
-		currentLatestRevHasImportantEnv := false
-		for _, env := range proxyDeployment.Environments {
-			for _, rev := range env.Revision {
-				log.Printf("[DEBUG] resourceApiProxyRead.  revision information: %+v", rev)
-				if currentLatestRev == rev.Number.String() && rev.State == "deployed" && env.Name != "test" {
-					currentLatestRevHasImportantEnv = true
-					break
-				}
-			}
-		}
-		// If the latest revision only has the test environment, or does not have any environment attached to it, update the latest revision.
-		if !currentLatestRevHasImportantEnv {
-			log.Printf("[DEBUG] resourceApiProxyRead. Latest revision has no environemtns: %s", currentLatestRev)
-			latest_rev = currentLatestRev
-		}
-	}
-
 	log.Printf("[DEBUG] resourceApiProxyRead.  revision_sha before: %#v", d.Get("revision_sha").(string))
 	d.Set("revision_sha", d.Get("bundle_sha").(string))
 	log.Printf("[DEBUG] resourceApiProxyRead.  revision_sha after: %#v", d.Get("revision_sha").(string))
@@ -165,13 +136,60 @@ func resourceApiProxyUpdate(d *schema.ResourceData, meta interface{}) error {
 		log.Printf("[INFO] resourceApiProxyUpdate bundle_sha changed to: %#v\n", d.Get("bundle_sha"))
 	}
 
-	proxyRev, _, err := client.Proxies.Import(d.Get("name").(string), d.Get("bundle").(string))
-	if err != nil {
-		log.Printf("[ERROR] resourceApiProxyUpdate error importing api_proxy: %s", err.Error())
-		return fmt.Errorf("[ERROR] resourceApiProxyUpdate error importing api_proxy: %s", err.Error())
+	var rev string
+	importProxy := false
+	var currentLatestRev string
+	if d.Get("deploy_test_revision_alone").(bool) {
+		// Only returns environments in use and their revision. In case Apigee changes their API to return all revisions
+		proxyDeployment, _, err := client.Proxies.GetDeployments(d.Get("name").(string))
+		if err != nil {
+			log.Printf("[INFO] resourceApiProxyUpdate error reading proxy deployment: %s", err.Error())
+			if strings.Contains(err.Error(), "404 ") {
+				log.Printf("[DEBUG] resourceApiProxyUpdate 404 encountered.  Must be a new proxy deployment: %#v", d.Get("name").(string))
+				importProxy = true
+			} else {
+				return fmt.Errorf("[ERROR] resourceApiProxyUpdate error reading proxy deployment: %s", err.Error())
+			}
+		}
+
+		// From State
+		currentLatestRev = d.Get("revision").(string)
+		currentLatestRevHasImportantEnv := false
+		for _, env := range proxyDeployment.Environments {
+			for _, rev := range env.Revision {
+				log.Printf("[DEBUG] resourceApiProxyUpdate.  revision information: %+v", rev)
+				if currentLatestRev == rev.Number.String() && rev.State == "deployed" && env.Name != "test" {
+					currentLatestRevHasImportantEnv = true
+					break
+				}
+			}
+		}
+		// If the latest revision only has the test environment, or does not have any environment attached to it, update the latest revision.
+		if !currentLatestRevHasImportantEnv {
+			log.Printf("[DEBUG] resourceApiProxyUpdate. Latest revision has no environments: %s", currentLatestRev)
+		} else {
+			importProxy = true
+		}
+	}
+	// Import. Creates a new proxy with a brand new revision. Or, if the proxy exists, increments the revision.
+	// Update. Update existing proxy inplace.
+	if d.Get("deploy_test_revision_alone").(bool) && !importProxy {
+		proxyRev, _, err := client.Proxies.Update(d.Get("name").(string), currentLatestRev, d.Get("bundle").(string))
+		if err != nil {
+			log.Printf("[ERROR] resourceApiProxyUpdate error importing api_proxy: %s", err.Error())
+			return fmt.Errorf("[ERROR] resourceApiProxyUpdate error importing api_proxy: %s", err.Error())
+		}
+		rev = proxyRev.Revision.String()
+	} else {
+		proxyRev, _, err := client.Proxies.Import(d.Get("name").(string), d.Get("bundle").(string))
+		if err != nil {
+			log.Printf("[ERROR] resourceApiProxyUpdate error importing api_proxy: %s", err.Error())
+			return fmt.Errorf("[ERROR] resourceApiProxyUpdate error importing api_proxy: %s", err.Error())
+		}
+		rev = proxyRev.Revision.String()
 	}
 
-	d.Set("revision", proxyRev.Revision.String())
+	d.Set("revision", rev)
 	d.Set("revision_sha", d.Get("bundle_sha").(string))
 
 	return resourceApiProxyRead(d, meta)

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/gofrs/uuid"
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/zambien/go-apigee-edge"
+	"github.com/ChrisLanks/go-apigee-edge"
 	"log"
 	"strings"
 )

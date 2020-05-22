@@ -6,9 +6,9 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/ChrisLanks/go-apigee-edge"
 	"github.com/gofrs/uuid"
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/zambien/go-apigee-edge"
 )
 
 func resourceApiProxyDeployment() *schema.Resource {
@@ -88,6 +88,7 @@ func resourceApiProxyDeploymentRead(d *schema.ResourceData, meta interface{}) (e
 	found := false
 	matchedRevision := "0"
 
+	// Will only return environmnets deployed and their revision
 	if deployments, _, err := client.Proxies.GetDeployments(d.Get("proxy_name").(string)); err != nil {
 		log.Printf("[ERROR] resourceApiProxyDeploymentRead error getting deployments: %s", err.Error())
 		if strings.Contains(err.Error(), "404 ") {
@@ -109,7 +110,17 @@ func resourceApiProxyDeploymentRead(d *schema.ResourceData, meta interface{}) (e
 					if d.Get("revision").(string) != "latest" && d.Get("revision").(string) == revision.Number.String() {
 						matchedRevision = revision.Number.String()
 						break
+						/*} else if d.Get("revision").(string) == "latest" {
+						// Lets get the latest deployment for the proxy, not environment
+						revs, err := getLatestRevision(client, d.Get("proxy_name").(string))
+						if err != nil {
+							return fmt.Errorf("[ERROR] resourceApiProxyDeploymentRead error getting the latest revision: %s", err.Error())
+						}
+						matchedRevision = strconv.Itoa(revs)
+						break*/
 					} else {
+						// Latest deployed for the enviornment, but not the latest revision deployed in the proxy
+						log.Printf("[DEBUG] resourceApiProxyDeploymentRead proxy revisions for environment: %s\n", revision.Number.String())
 						matchedRevision = revision.Number.String()
 					}
 				}
@@ -210,7 +221,7 @@ func resourceApiProxyDeploymentUpdate(d *schema.ResourceData, meta interface{}) 
 
 	if err != nil {
 		log.Printf("[ERROR] resourceApiProxyDeploymentUpdate error redeploying: %s", err.Error())
-		if strings.Contains(err.Error(), " is already deployed into environment ") {
+		if strings.Contains(err.Error(), " is already deployed into environment ") || strings.Contains(err.Error(), " is already deployed in organization ") {
 			return resourceApiProxyDeploymentRead(d, meta)
 		}
 		return fmt.Errorf("[ERROR] resourceApiProxyDeploymentUpdate error redeploying: %s", err.Error())
@@ -253,7 +264,8 @@ func resourceApiProxyDeploymentDelete(d *schema.ResourceData, meta interface{}) 
 func getLatestRevision(client *apigee.EdgeClient, proxyName string) (int, error) {
 	proxy, _, err := client.Proxies.Get(proxyName)
 	if err != nil {
-		return -1, fmt.Errorf("[ERROR] resourceApiProxyRead error reading proxies: %s", err.Error())
+		return -1, fmt.Errorf("[ERROR] getLatestRevision error reading proxies: %s", err.Error())
 	}
+	log.Printf("[DEBUG] getLatestRevision revision is %d for %s", len(proxy.Revisions), proxyName)
 	return len(proxy.Revisions), nil
 }

@@ -1,7 +1,7 @@
 package apigee
 
 import (
-	"github.com/zambien/go-apigee-edge"
+	"github.com/ChrisLanks/go-apigee-edge"
 	"log"
 )
 
