@@ -4,9 +4,118 @@ A Terraform Apigee provider.
 
 Allows Terraform deployments and management of Apigee API proxies, deployments, products, companies/developers/apps, and target servers.
 
+## Why is this forked?
+
+I needed a way to deploy to the environment "test" without always creating a new proxy revision. IE. All changes commited to a proxy repo are then terraform applied and pushed to the latest revision, but only if its either not deployed to an environment or only occupied by the environment "test".  If "test" and "stage" are deployed to the latest proxy revision, then a new proxy revision will be moved and "test" will be updated to point at this.
+
+### old way functionality:
+
+Here is an example of how the code used to perform:
+Here we have 2 revisions.
+|Revisions|Environment|
+|---|---|
+|2|test|
+|1|stage|
+
+If the proxy code was deployed in old way, it would look like this:
+|Revisions|Environment|
+|---|---|
+|3||
+|2|test|
+|1|stage|
+
+And again:
+If the proxy code was deployed in old way, it would look like this:
+|Revisions|Environment|
+|---|---|
+|4||
+|3||
+|2|test|
+|1|stage|
+
+Say test was to be pointed at the latest. You have this:
+|Revisions|Environment|
+|---|---|
+|4|test|
+|3||
+|2||
+|1|stage|
+
+And then I updated the deployment code, you would be left with this:
+|Revisions|Environment|
+|---|---|
+|5||
+|4|test|
+|3||
+|2||
+|1|stage|
+
+
+### new way functionality:
+I did not like this as a new revision for every mistake someone makes causes too much noise. Breaking test should not be an issue. So my changes do this:
+
+Here is an example of how the code used to perform:
+Here we have 2 revisions.
+|Revisions|Environment|
+|---|---|
+|2|test|
+|1|stage|
+
+If the proxy code was deployed in new way, it would look like this:
+|Revisions|Environment|
+|---|---|
+|2|test|
+|1|stage|
+
+And again:
+If the proxy code was deployed in new way, it would look like this:
+|Revisions|Environment|
+|---|---|
+|2|test|
+|1|stage|
+
+Say test was to be pointed at the latest. You have this:
+|Revisions|Environment|
+|---|---|
+|2|test|
+|1|stage|
+
+See how nice that is? But lets see a few more examples if the environment was not just "test":
+
+Here is an example of how the code used to perform:
+Here we have 2 revisions.
+|Revisions|Environment|
+|---|---|
+|2|test|
+|1|stage|
+
+Now you promote the stage revision to the latest, like this:
+|Revisions|Environment|
+|---|---|
+|2|test,stage|
+|1||
+
+If the proxy code was updated and deployed, it would now look like this:
+|Revisions|Environment|
+|---|---|
+|3|test|
+|2|stage|
+|1||
+
+You see that? It created a new revision, and promoted test to it. Now, I have noticed sometimes terraform needs to run twice to catch the changes to test to point to the new revision. But this drastically reduces the number of revisions created. 
+
+Next time changes are made to the proxy:
+|Revisions|Environment|
+|---|---|
+|3|test|
+|2|stage|
+|1||
+
+Still, no new revision was created.  If you want to go back to the default behavior, simply turn off the flag "deploy_test_revision_alone = false"
+
 ## Installation
 
-Download the appropriate release for your system: https://github.com/zambien/terraform-provider-apigee/releases
+Download the appropriate release for your system: https://github.com/ChrisLanks/terraform-provider-apigee/releases
 
 See here for info on how to install the plugin:
 
@@ -18,13 +127,13 @@ An example of how to do this would be:
 `mkdir -p ~/terraform-providers`
 
 2. Download plugin for linux into your home directory
-`curl -L https://github.com/zambien/terraform-provider-apigee/releases/download/v0.0.7/terraform-provider-apigee-v0.0.7-linux64 -o ~/terraform-providers/terraform-provider-apigee-v0.0.7-linux64`
+`curl -L https://github.com/ChrisLanks/terraform-provider-apigee/releases/download/v0.0.7/terraform-provider-apigee-v0.0.7-linux64 -o ~/terraform-providers/terraform-provider-apigee-v0.0.7-linux64`
 
 3. Add the providers clause if you don't already have one.  Warning, this command will overwrite your .terraformrc!
 ```
 cat << EOF > ~/.terraformrc
 providers {
-    apigee = "$HOME/terraform-providers/terraform-provider-apigee-v0.0.7-linux64"
+    apigee = "$HOME/.terraform-providers/terraform-provider-apigee_v0.0.7"
 }
 EOF
 ```
@@ -102,11 +211,12 @@ resource "apigee_product" "helloworld_product" {
 # A proxy deployment
 resource "apigee_api_proxy_deployment" "helloworld_proxy_deployment" {
    proxy_name   = "${apigee_api_proxy.helloworld_proxy.name}"
-   org          = "${var.org}"
+   org          = "${var.org}" # Depricated. Uses the default org
    env          = "${var.env}"
+   deploy_test_revision_alone = true  # Why I forked. Reasons in "Why is this forked?" 
 
    # NOTE: revision = "latest" 
-   # will deploy the latest revision of the api proxy 
+   # will deploy the latest revision of the api proxy. Please avoid the word latest. There are still glitches
    revision     = "${apigee_api_proxy.helloworld_proxy.revision}"
 }
 
@@ -209,7 +319,7 @@ resource "apigee_shared_flow_deployment" "helloworld_shared_flow_deployment" {
 ```
 
 ## Contributions
-Please read [our contribution guidelines.](https://github.com/zambien/terraform-provider-apigee/blob/master/.github/CONTRIBUTING.md)
+Please read [our contribution guidelines.](https://github.com/ChrisLanks/terraform-provider-apigee/blob/master/.github/CONTRIBUTING.md)
 
 ## Building
 Should be buildable on any terraform version at or higher than 0.9.3.  To build you would use the standard go build command.  For example for MacOS:
@@ -224,6 +334,8 @@ Linux:
 
 ## Testing
 To run tests, use the following commands.  Note that you will need your credentials setup for the tests to run. You can authenticate with your username/password OR an access token from Apigee OAuth.
+
+NOTE: Tests will run on apigee. Ensure you don't have production data there.
 
 #### Set env vars for test using username/password:
 ```
@@ -260,3 +372,18 @@ goreleaser # actually create the release
 You can read more about goreleaser here:
 
 https://goreleaser.com/
+
+
+## Known Issues
+
+I noticed that in proxy, setting the revision to "latest" doesn't work too well. I am not sure how to fix this. When terraform runs "resourceApiProxyDeploymentRead", it sees that the state file shows "latest". However, a proxy deployment may have occured increasing the revision number. Terraform only compares the string "latest" to string "latest" and doesn't notice the change. If you you use the example above and point it directly to the respurce ("apigee_api_proxy.helloworld_proxy.revision"), then your revision will always be the "latest" revision without actually using the string "latest" in your terraform code and does not cause bugs like the string "latest" does. This is the best option.
+
+At this time you cannot import the following resources:
+apigee_developer_app
+
+## How to import:
+
+To import a proxy named "apigee-test" in the "test" env
+```
+terraform import apigee_api_proxy_deployment.apigee-test_test_deployment  apigee-test_test_deployment
+```

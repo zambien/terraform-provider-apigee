@@ -8,7 +8,7 @@ import (
 
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/zambien/go-apigee-edge"
+	"github.com/ChrisLanks/go-apigee-edge"
 )
 
 func TestAccSharedFlow_Updated(t *testing.T) {

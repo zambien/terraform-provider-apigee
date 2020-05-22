@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/zambien/go-apigee-edge"
+	"github.com/ChrisLanks/go-apigee-edge"
 	"log"
 	"strings"
 	"testing"
@@ -75,7 +75,7 @@ resource "apigee_api_proxy" "foo_api_proxy" {
 
 resource "apigee_api_proxy_deployment" "foo_api_proxy_deployment" {
    proxy_name   = "${apigee_api_proxy.foo_api_proxy.name}"
-   org          = "zambien-trial"
+   org          = "ChrisLanks-trial"
    env          = "test"
    revision     = "1"
 }

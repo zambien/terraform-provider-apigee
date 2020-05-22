@@ -4,7 +4,7 @@ package apigee
 import (
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/zambien/go-apigee-edge"
+	"github.com/ChrisLanks/go-apigee-edge"
 )
 
 func Provider() terraform.ResourceProvider {
