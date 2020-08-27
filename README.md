@@ -254,6 +254,7 @@ We use goreleaser to release versions.  The steps to release are:
 ```
 export GITHUB_TOKEN="A_GITHUB_TOKEN_THAT_HAS_CORRECT_ACCESS_ENTITLEMENTS"
 git tag -a v0.0.x -m "Some description of the release"
+touch /tmp/temp.txt && gpg --local-user 0F9341E08F4355B5  --armor --detach-sign /tmp/temp.txt
 goreleaser # actually create the release
 ```
 
