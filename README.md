@@ -4,6 +4,8 @@ A Terraform Apigee provider.
 
 Allows Terraform deployments and management of Apigee API proxies, deployments, products, companies/developers/apps, and target servers.
 
+https://registry.terraform.io/providers/zambien/apigee/
+
 ## Installation
 
 Download the appropriate release for your system: https://github.com/zambien/terraform-provider-apigee/releases
@@ -254,6 +256,8 @@ We use goreleaser to release versions.  The steps to release are:
 ```
 export GITHUB_TOKEN="A_GITHUB_TOKEN_THAT_HAS_CORRECT_ACCESS_ENTITLEMENTS"
 git tag -a v0.0.x -m "Some description of the release"
+export GPG_FINGERPRINT=[your_GPG_fingerprint]
+touch /tmp/temp.txt && gpg --local-user ${GPG_FINGERPRINT}  --armor --detach-sign /tmp/temp.txt
 goreleaser # actually create the release
 ```
 
