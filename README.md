@@ -4,6 +4,8 @@ A Terraform Apigee provider.
 
 Allows Terraform deployments and management of Apigee API proxies, deployments, products, companies/developers/apps, and target servers.
 
+https://registry.terraform.io/providers/zambien/apigee/
+
 ## Installation
 
 Download the appropriate release for your system: https://github.com/zambien/terraform-provider-apigee/releases
