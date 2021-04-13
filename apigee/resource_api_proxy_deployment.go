@@ -255,5 +255,6 @@ func getLatestRevision(client *apigee.EdgeClient, proxyName string) (int, error)
 	if err != nil {
 		return -1, fmt.Errorf("[ERROR] resourceApiProxyRead error reading proxies: %s", err.Error())
 	}
-	return len(proxy.Revisions), nil
+	latestRev := proxy.Revisions[len(proxy.Revisions)-1]
+	return int(latestRev), nil
 }

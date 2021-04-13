@@ -2,11 +2,12 @@ package apigee
 
 import (
 	"fmt"
+	"log"
+	"strings"
+
 	"github.com/gofrs/uuid"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/zambien/go-apigee-edge"
-	"log"
-	"strings"
 )
 
 func resourceDeveloper() *schema.Resource {
