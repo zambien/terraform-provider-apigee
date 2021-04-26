@@ -20,13 +20,13 @@ An example of how to do this would be:
 `mkdir -p ~/terraform-providers`
 
 2. Download plugin for linux into your home directory
-`curl -L https://github.com/zambien/terraform-provider-apigee/releases/download/v0.0.7/terraform-provider-apigee-v0.0.7-linux64 -o ~/terraform-providers/terraform-provider-apigee-v0.0.7-linux64`
+`curl -L https://github.com/zambien/terraform-provider-apigee/releases/download/v0.0.22/terraform-provider-apigee_0.0.22_linux_amd64.tar.gz -o ~/terraform-providers/terraform-provider-apigee_0.0.22_linux_amd64.tar.gz && cd ~/terraform-providers/ && tar xzf terraform-provider-apigee_0.0.22_linux_amd64.tar.gz`
 
 3. Add the providers clause if you don't already have one.  Warning, this command will overwrite your .terraformrc!
 ```
 cat << EOF > ~/.terraformrc
 providers {
-    apigee = "$HOME/terraform-providers/terraform-provider-apigee-v0.0.7-linux64"
+    apigee = "$HOME/terraform-providers/terraform-provider-apigee_v0.0.22"
 }
 EOF
 ```
