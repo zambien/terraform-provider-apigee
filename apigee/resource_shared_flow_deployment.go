@@ -253,5 +253,11 @@ func getLatestSharedFlowRevision(client *apigee.EdgeClient, sharedFlowName strin
 	if err != nil {
 		return -1, fmt.Errorf("[ERROR] getLatestSharedFlowRevision error reading shared flows: %s", err.Error())
 	}
-	return len(sharedFlow.Revisions), nil
+
+	latestRevision, err := strconv.Atoi(sharedFlow.Revisions[len(sharedFlow.Revisions)-1].String())
+	if err != nil {
+		return -1, fmt.Errorf("[ERROR] getLatestSharedFlowRevision error reading shared flows: %s", err.Error())
+	}
+
+	return latestRevision, nil
 }
