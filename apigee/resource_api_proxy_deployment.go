@@ -149,7 +149,7 @@ func resourceApiProxyDeploymentCreate(d *schema.ResourceData, meta interface{}) 
 		rev_int, err := getLatestRevision(client, proxy_name)
 		rev = apigee.Revision(rev_int)
 		if err != nil {
-			return fmt.Errorf("[ERROR] resourceApiProxyDeploymentUpdate error getting latest revision: %v", err)
+			return fmt.Errorf("[ERROR] resourceApiProxyDeploymentCreate error getting latest revision: %v", err)
 		}
 	}
 
@@ -210,7 +210,7 @@ func resourceApiProxyDeploymentUpdate(d *schema.ResourceData, meta interface{}) 
 
 	if err != nil {
 		log.Printf("[ERROR] resourceApiProxyDeploymentUpdate error redeploying: %s", err.Error())
-		if strings.Contains(err.Error(), " is already deployed into environment ") {
+		if strings.Contains(err.Error(), " is already deployed ") {
 			return resourceApiProxyDeploymentRead(d, meta)
 		}
 		return fmt.Errorf("[ERROR] resourceApiProxyDeploymentUpdate error redeploying: %s", err.Error())
