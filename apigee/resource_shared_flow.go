@@ -5,7 +5,6 @@ import (
 
 	"fmt"
 	"log"
-	"strconv"
 	"time"
 
 	"github.com/gofrs/uuid"
@@ -80,7 +79,8 @@ func resourceSharedFlowImport(d *schema.ResourceData, meta interface{}) ([]*sche
 	if err != nil {
 		return []*schema.ResourceData{}, fmt.Errorf("[DEBUG] resourceSharedFlowImport. Error getting deployment shared flow: %v", err)
 	}
-	latestRev := strconv.Itoa(len(sharedFlow.Revisions))
+	latestRev := sharedFlow.Revisions[len(sharedFlow.Revisions)-1]
+
 	d.Set("revision", latestRev)
 	d.Set("name", d.Id())
 	return []*schema.ResourceData{d}, nil
@@ -103,7 +103,7 @@ func resourceSharedFlowRead(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	latestRev := strconv.Itoa(len(u.Revisions))
+	latestRev := u.Revisions[len(u.Revisions)-1]
 
 	log.Printf("[DEBUG] resourceSharedFlowRead.  revision_sha before: %#v", d.Get("revision_sha").(string))
 	d.Set("revision_sha", d.Get("bundle_sha").(string))
