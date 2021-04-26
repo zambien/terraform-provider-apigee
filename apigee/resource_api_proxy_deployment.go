@@ -119,9 +119,30 @@ func resourceApiProxyDeploymentRead(d *schema.ResourceData, meta interface{}) (e
 
 	if found {
 		if d.Get("revision").(string) == "latest" {
+
+			log.Printf("[DEBUG] resourceApiProxyDeploymentRead doing latest check")
+
+			// Get the latest revision and make sure we show it as different if it is
+			rev_int := 0
+			rev := apigee.Revision(rev_int)
+
+			rev_int, err := getLatestRevision(client, d.Get("proxy_name").(string))
+			rev = apigee.Revision(rev_int)
+			if err != nil {
+				return fmt.Errorf("[ERROR] resourceApiProxyDeploymentUpdate error getting latest revision: %v", err)
+			}
+
+			log.Printf("[DEBUG] resourceApiProxyDeploymentRead found latest revision: %#v\n", rev)
+
+			if matchedRevision != strconv.Itoa(rev_int) {
+				log.Printf("[DEBUG] resourceApiProxyDeploymentRead latest deployed revision: %#v did not match actual latest revision: %#v. Updating revision to latest available. \n", matchedRevision, strconv.Itoa(rev_int))
+				d.Set("revision", strconv.Itoa(rev_int))
+			}
+
 			d.SetId(matchedRevision)
 		} else {
 			d.Set("revision", matchedRevision)
+			d.Set("deployed_revision", matchedRevision)
 		}
 		log.Printf("[DEBUG] resourceApiProxyDeploymentRead - deployment found. Revision is: %#v", d.Get("revision").(string))
 	} else {
