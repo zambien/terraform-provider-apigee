@@ -79,7 +79,7 @@ func resourceApiProxyImport(d *schema.ResourceData, meta interface{}) ([]*schema
 	if err != nil {
 		return []*schema.ResourceData{}, fmt.Errorf("[DEBUG] resourceApiProxyImport. Error getting deployment api: %v", err)
 	}
-	latestRev := int(proxy.Revisions[len(proxy.Revisions)-1])
+	latestRev := proxy.Revisions[len(proxy.Revisions)-1]
 	d.Set("revision", latestRev)
 	d.Set("name", d.Id())
 	return []*schema.ResourceData{d}, nil
@@ -102,7 +102,7 @@ func resourceApiProxyRead(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	latest_rev := int(u.Revisions[len(u.Revisions)-1])
+	latest_rev := u.Revisions[len(u.Revisions)-1]
 
 	log.Printf("[DEBUG] resourceApiProxyRead.  revision_sha before: %#v", d.Get("revision_sha").(string))
 	d.Set("revision_sha", d.Get("bundle_sha").(string))
