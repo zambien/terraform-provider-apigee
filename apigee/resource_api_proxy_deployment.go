@@ -138,11 +138,8 @@ func resourceApiProxyDeploymentRead(d *schema.ResourceData, meta interface{}) (e
 				log.Printf("[DEBUG] resourceApiProxyDeploymentRead latest deployed revision: %#v did not match actual latest revision: %#v. Updating revision to latest available. \n", matchedRevision, strconv.Itoa(rev_int))
 				d.Set("revision", strconv.Itoa(rev_int))
 			}
-
-			d.SetId(matchedRevision)
 		} else {
 			d.Set("revision", matchedRevision)
-			d.Set("deployed_revision", matchedRevision)
 		}
 		log.Printf("[DEBUG] resourceApiProxyDeploymentRead - deployment found. Revision is: %#v", d.Get("revision").(string))
 	} else {
