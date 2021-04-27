@@ -6,31 +6,17 @@ Allows Terraform deployments and management of Apigee API proxies, deployments, 
 
 https://registry.terraform.io/providers/zambien/apigee/
 
-## Installation
-
-Download the appropriate release for your system: https://github.com/zambien/terraform-provider-apigee/releases
-
-See here for info on how to install the plugin:
-
-https://www.terraform.io/docs/plugins/basics.html
-
-An example of how to do this would be:
-
-1. Make a terraform providers folder in home
-`mkdir -p ~/terraform-providers`
-
-2. Download plugin for linux into your home directory
-`curl -L https://github.com/zambien/terraform-provider-apigee/releases/download/v0.0.23/terraform-provider-apigee-v0.0.23-linux64 -o ~/terraform-providers/terraform-provider-apigee-v0.0.23-linux64`
-
-3. Add the providers clause if you don't already have one.  Warning, this command will overwrite your .terraformrc!
-```
-cat << EOF > ~/.terraformrc
-providers {
-    apigee = "$HOME/terraform-providers/terraform-provider-apigee-v0.0.23-linux64"
-}
-EOF
-```
-
+- [terraform-provider-apigee](#terraform-provider-apigee)
+  * [TFVARS for provider](#tfvars-for-provider)
+  * [Simple Example](#simple-example)
+  * [Contributions](#contributions)
+  * [Building](#building)
+  * [Testing](#testing)
+      - [Set env vars for test using username/password:](#set-env-vars-for-test-using-username-password-)
+      - [Set env vars for test using access token:](#set-env-vars-for-test-using-access-token-)
+  * [Releasing](#releasing)
+  * [Known issues](#known-issues)
+  
 ## TFVARS for provider
 
 ```
@@ -48,6 +34,25 @@ APIGEE_ACCESS_TOKEN="my-access-token"
 ## Simple Example
 
 ```
+
+# note, to test and build the plugin locally uncomment the lines below or do something like it
+# provider_version=0.0.x
+# mkdir -p ~/.terraform.d/plugins/local/zambien/apigee/${provider_version}/linux_amd64/
+# mv terraform-provider-apigee-v${provider_version}-linux64 ~/.terraform.d/plugins/local/zambien/apigee/${provider_version}/linux_amd64/terraform-provider-apigee_v${provider_version}
+
+terraform {
+  required_version = ">= 0.14"
+
+  required_providers {
+    apigee = {
+      # pull from registry
+      source = "zambien/apigee"
+      # test locally built plugin
+      # source = "local/zambien/apigee"
+      version = "~> 0.0.23"
+    }
+  }
+}
 
 variable "org" { default = "my-really-cool-apigee-org-name" }
 variable "env" { default = "test" }
@@ -109,7 +114,8 @@ resource "apigee_api_proxy_deployment" "helloworld_proxy_deployment" {
 
    # NOTE: revision = "latest" 
    # will deploy the latest revision of the api proxy 
-   revision     = "${apigee_api_proxy.helloworld_proxy.revision}"
+   revision     = "latest"
+   # OR revision = "1" # for specific revision
 }
 
 # A target server
@@ -206,7 +212,8 @@ resource "apigee_shared_flow_deployment" "helloworld_shared_flow_deployment" {
 
    # NOTE: revision = "latest" 
    # will deploy the latest revision of the shared flow 
-   revision     = "${apigee_shared_flow.helloworld_shared_flow.revision}"
+   revision     = "latest"
+   # OR revision = "1" # for specific revision
 }
 ```
 
@@ -264,3 +271,7 @@ goreleaser # actually create the release
 You can read more about goreleaser here:
 
 https://goreleaser.com/
+
+## Known issues
+
+* You will often find the need to run apply twice when updating a proxy.  This has to do with how terraform handles state.  This plugin will be rewritten to combine proxies and proxy deployments to resolve this issue in the future.
