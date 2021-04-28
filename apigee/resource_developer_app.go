@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gofrs/uuid"
 	"github.com/hashicorp/terraform/helper/schema"
+	//"github.com/mitchellh/mapstructure"
 	"github.com/zambien/go-apigee-edge"
 	"log"
 	"strings"
@@ -43,7 +44,31 @@ func resourceDeveloperApp() *schema.Resource {
 			"credentials": {
 				Type:     schema.TypeList,
 				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeMap},
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"consumer_key": &schema.Schema{
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"consumer_secret": &schema.Schema{
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"issued_at": &schema.Schema{
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"expires_at": &schema.Schema{
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						/*
+						"api_products": &schema.Schema{
+							Type:     schema.TypeString,
+							Computed: true,
+						},*/
+					},
+				},
 			},
 			"scopes": {
 				Type:     schema.TypeList,
@@ -63,6 +88,14 @@ func resourceDeveloperApp() *schema.Resource {
 				Computed: true,
 			},
 			"status": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"consumer_key": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"consumer_secret": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -117,15 +150,14 @@ func resourceDeveloperAppRead(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] resourceDeveloperAppRead DeveloperAppData: %+v\n", DeveloperAppData)
 
 	//Scopes and apiProducts are tricky.  These actually result in an array which will always have
-	//one element unless an outside API is called.  Since using terraform we assume you do everything there
-	//you might only ever have one credential... we'll see.
-	scopes := flattenStringList(DeveloperAppData.Credentials[0].Scopes)
-
-	credentials := mapFromCredentials(DeveloperAppData.Credentials)
+	//one element unless an outside API is called.
+	//Get the most recent scopes from the last credentials set
+	scopes := flattenStringList(DeveloperAppData.Credentials[len(DeveloperAppData.Credentials)-1].Scopes)
 
 	//Apigee does not return products in the order you send them
+	//Get the most recent api products from the last credentials set
 	oldApiProducts := getStringList("api_products", d)
-	newApiProducts := apiProductsListFromCredentials(DeveloperAppData.Credentials[0].ApiProducts)
+	newApiProducts := apiProductsListFromCredentials(DeveloperAppData.Credentials[len(DeveloperAppData.Credentials)-1].ApiProducts)
 
 	if !arraySortedEqual(oldApiProducts, newApiProducts) {
 		d.Set("api_products", newApiProducts)
@@ -133,14 +165,31 @@ func resourceDeveloperAppRead(d *schema.ResourceData, meta interface{}) error {
 		d.Set("api_products", oldApiProducts)
 	}
 
+
 	d.Set("name", DeveloperAppData.Name)
 	d.Set("attributes", DeveloperAppData.Attributes)
-	d.Set("credentials", credentials)
 	d.Set("scopes", scopes)
 	d.Set("callback_url", DeveloperAppData.CallbackUrl)
 	d.Set("app_id", DeveloperAppData.AppId)
 	d.Set("developer_id", DeveloperAppData.DeveloperId)
 	d.Set("status", DeveloperAppData.Status)
+
+
+	//For some reason this is not ever set and there are no errors.  I have followed the syntax here:
+	// https://stackoverflow.com/questions/54033185/writing-a-terraform-provider-with-nested-map
+	//and here: https://learn.hashicorp.com/tutorials/terraform/provider-complex-read
+	//to no avail. We may need to update to lastest plugin sdk.
+	//For now just set the last consumer key and secret as simple strings.
+	/*
+	credentials := flattenCredentials(DeveloperAppData.Credentials)
+	if cred_err := d.Set("credentials", credentials); err != nil {
+		return fmt.Errorf("[ERROR] resourceDeveloperAppRead error setting credentials: %s", cred_err.Error())
+	}*/
+
+
+	d.Set("credentials", make([]interface{}, 0))
+	d.Set("consumer_key", DeveloperAppData.Credentials[len(DeveloperAppData.Credentials)-1].ConsumerKey)
+	d.Set("consumer_secret", DeveloperAppData.Credentials[len(DeveloperAppData.Credentials)-1].ConsumerSecret)
 
 	return nil
 }
