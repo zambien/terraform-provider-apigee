@@ -174,8 +174,10 @@ func resourceApiProxyDeploymentCreate(d *schema.ResourceData, meta interface{}) 
 	proxyDep, _, err := client.Proxies.Deploy(proxy_name, env, rev, delay, override)
 
 	if err != nil {
-
-		if strings.Contains(err.Error(), "conflicts with existing deployment path") {
+		if strings.Contains(err.Error(), " is already deployed ") {
+			log.Printf("[ERROR] resourceApiProxyDeploymentCreate error deploying.  We will read into state: %s", err.Error())
+			resourceApiProxyDeploymentUpdate(d, meta)
+		} else if strings.Contains(err.Error(), "conflicts with existing deployment path") {
 			//create, fail, update
 			log.Printf("[ERROR] resourceApiProxyDeploymentCreate error deploying: %s", err.Error())
 			log.Print("[DEBUG] resourceApiProxyDeploymentCreate something got out of sync... maybe someone messing around in apigee directly.  Terraform OVERRIDE!!!")

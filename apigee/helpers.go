@@ -1,7 +1,6 @@
 package apigee
 
 import (
-	"github.com/17media/structs"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/zambien/go-apigee-edge"
 	"reflect"
@@ -60,16 +59,34 @@ func attributesFromMap(attributes map[string]interface{}) []apigee.Attribute {
 	return result
 }
 
-func mapFromCredentials(credentials []apigee.Credential) []interface{} {
+func flattenCredentials(in []apigee.Credential) []interface{} {
 
-	result := make([]interface{}, 0, len(credentials))
+	if in != nil {
 
-	for _, elem := range credentials {
-		credentialMap := structs.Map(elem)
-		result = append(result, credentialMap)
+		out := make([]interface{}, len(in), len(in))
+
+		for i, elem := range in {
+
+			m := make(map[string]interface{})
+
+			m["consumer_key"] = elem.ConsumerKey
+			m["consumer_secret"] = elem.ConsumerSecret
+			m["issued_at"] = elem.IssuedAt
+			m["expired_at"] = elem.ExpiresAt
+
+
+			/*
+			if len(elem.ApiProducts) > 0 {
+				m["port_mapping"] = flattenDockerPortMappings(elem.PortMappings)
+			}*/
+
+			out[i] = m
+		}
+
+		return out
 	}
 
-	return result
+	return make([]interface{}, 0)
 }
 
 func arraySortedEqual(a, b []string) bool {

@@ -40,12 +40,6 @@ func resourceCompanyApp() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			/*
-			"credentials": {
-				Type:     schema.TypeList,
-				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeMap},
-			},*/
 			"credentials": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -104,7 +98,7 @@ func resourceCompanyApp() *schema.Resource {
 			},
 			"scopes": {
 				Type:     schema.TypeList,
-				Computed: true,
+				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"callback_url": {
@@ -116,6 +110,14 @@ func resourceCompanyApp() *schema.Resource {
 				Computed: true,
 			},
 			"status": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"consumer_key": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"consumer_secret": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -170,28 +172,17 @@ func resourceCompanyAppRead(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] resourceCompanyAppRead CompanyAppData: %+v\n", CompanyAppData)
 
 	//Scopes and apiProducts are tricky.  These actually result in an array which will always have
-	//one element unless an outside API is called.  Since using terraform we assume you do everything there
-	//you might only ever have one credential... we'll see.
-	scopes := flattenStringList(CompanyAppData.Credentials[0].Scopes)
+	//one element unless an outside API is called.
+	//Get the most recent scopes from the last credentials set
+	scopes := flattenStringList(CompanyAppData.Credentials[len(CompanyAppData.Credentials)-1].Scopes)
 
-	credentials := mapFromCredentials(CompanyAppData.Credentials)
-
-	//credentials_again
-	if CompanyAppData.Credentials != nil {
-
-		log.Print("[DEBUG] resourceCompanyAppRead credentials ConsumerKey: ", CompanyAppData.Credentials[0].ConsumerKey)
-		log.Print("[DEBUG] resourceCompanyAppRead credentials ConsumerSecret: ", CompanyAppData.Credentials[0].ConsumerSecret)
-
-		d.Set("credentials.0.consumer_key", CompanyAppData.Credentials[0].ConsumerKey)
-		d.Set("credentials.0.consumer_secret", CompanyAppData.Credentials[0].ConsumerSecret)
-
-		log.Print("[DEBUG] resourceCompanyAppRead credentials: ", d.Get("credentials.0"))
-		log.Print("[DEBUG] resourceCompanyAppRead credentials consumer key: ", d.Get("credentials.0.consumer_key"))
-	}
+	//TBD: credentials complex list.  See comments in resource_developer_app.go
+	d.Set("credentials", make([]interface{}, 0))
 
 	//Apigee does not return products in the order you send them
+	//Get the most recent api products from the last credentials set
 	oldApiProducts := getStringList("api_products", d)
-	newApiProducts := apiProductsListFromCredentials(CompanyAppData.Credentials[0].ApiProducts)
+	newApiProducts := apiProductsListFromCredentials(CompanyAppData.Credentials[len(CompanyAppData.Credentials)-1].ApiProducts)
 
 	if !arraySortedEqual(oldApiProducts, newApiProducts) {
 		d.Set("api_products", newApiProducts)
@@ -202,14 +193,13 @@ func resourceCompanyAppRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("test","tester")
 	d.Set("name", CompanyAppData.Name)
 	d.Set("attributes", CompanyAppData.Attributes)
-	d.Set("credentials", CompanyAppData.Credentials)
 	d.Set("scopes", scopes)
 	d.Set("callback_url", CompanyAppData.CallbackUrl)
 	d.Set("app_id", CompanyAppData.AppId)
 	d.Set("company_name", CompanyAppData.CompanyName)
 	d.Set("status", CompanyAppData.Status)
-
-	log.Print("[DEBUG] resourceCompanyAppRead credentials: ", credentials)
+	d.Set("consumer_key", CompanyAppData.Credentials[len(CompanyAppData.Credentials)-1].ConsumerKey)
+    d.Set("consumer_secret", CompanyAppData.Credentials[len(CompanyAppData.Credentials)-1].ConsumerSecret)
 
 	return nil
 }
@@ -259,21 +249,6 @@ func setCompanyAppData(d *schema.ResourceData) (apigee.CompanyApp, error) {
 		apiProducts = getStringList("api_products", d)
 	}
 
-	log.Print("[DEBUG] setCompanyAppData credentials: ", d.Get("credentials"))
-	var credentials []apigee.Credential
-	if d.Get("credentials") != nil {
-
-		credentialsMap := d.Get("credentials").([]interface{})
-
-		for elem := range credentialsMap {
-
-
-			log.Printf("[DEBUG] setCompanyAppData credentialsMap element: %v", elem)
-
-			//credentials = append(result, t)
-		}
-	}
-
 	scopes := []string{""}
 	if d.Get("scopes") != nil {
 		scopes = getStringList("scopes", d)
@@ -290,7 +265,6 @@ func setCompanyAppData(d *schema.ResourceData) (apigee.CompanyApp, error) {
 		Attributes:  attributes,
 		ApiProducts: apiProducts,
 		Scopes:      scopes,
-		Credentials: credentials,
 		CallbackUrl: d.Get("callback_url").(string),
 	}
 
